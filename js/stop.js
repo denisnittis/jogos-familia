@@ -6,7 +6,7 @@ const CATEGORIAS = [
   { id: "nome", label: "Nome" },
   { id: "comida", label: "Comida" },
   { id: "cor", label: "Cor" },
-  { id: "cep", label: "CEP" },
+  { id: "cep", label: "CEP (Cidade/Estado/País)" },
   { id: "objeto", label: "Objeto" },
   { id: "time", label: "Time" },
   { id: "cantorAtor", label: "Cantor / Ator" },
