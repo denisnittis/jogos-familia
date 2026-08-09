@@ -17,6 +17,102 @@ const CATEGORIAS = [
 // Alfabeto tradicional do Stop/Adedonha: sem K, W, Y.
 const LETRAS = "ABCDEFGHIJLMNOPQRSTUVXZ";
 
+// Exemplos de respostas válidas por categoria/letra, só pra ajudar o grupo
+// a decidir uma contestação — não são a lista oficial de "palavras certas",
+// é só uma referência. "—" quando não há exemplo comum pra combinação.
+const SUGESTOES = {
+  nome: {
+    A: "Ana, Antônio, Alice", B: "Bruno, Beatriz, Bernardo", C: "Carlos, Camila, Cauã",
+    D: "Daniel, Diana, Diego", E: "Eduardo, Elisa, Enzo", F: "Felipe, Fernanda, Francisco",
+    G: "Gabriel, Giovanna, Gustavo", H: "Helena, Henrique, Hugo", I: "Igor, Isabela, Ivan",
+    J: "João, Julia, José", L: "Lucas, Laura, Leonardo", M: "Maria, Miguel, Marcelo",
+    N: "Natália, Nicolas, Norma", O: "Otávio, Olívia, Osmar", P: "Paulo, Patrícia, Pedro",
+    Q: "Quintino, Quitéria", R: "Rafael, Renata, Ricardo", S: "Sofia, Sérgio, Simone",
+    T: "Tiago, Tatiane, Thiago", U: "Úrsula, Ubirajara", V: "Vitória, Vinícius, Vera",
+    X: "Xavier, Xuxa", Z: "Zeca, Zilda, Zuleica",
+  },
+  comida: {
+    A: "Abacaxi, Arroz, Abóbora", B: "Batata, Bolo, Bife", C: "Carne, Chocolate, Churrasco",
+    D: "Damasco, Doce de leite", E: "Ervilha, Espaguete", F: "Feijão, Frango, Farofa",
+    G: "Goiabada, Grão-de-bico", H: "Hambúrguer, Homus", I: "Iogurte, Inhame",
+    J: "Jiló, Jaca", L: "Lasanha, Limão, Linguiça", M: "Macarrão, Manga, Milho",
+    N: "Nhoque, Noz", O: "Ovo, Omelete", P: "Pizza, Pão, Presunto",
+    Q: "Quibe, Queijo", R: "Risoto, Repolho", S: "Salada, Sopa, Sushi",
+    T: "Tomate, Torta, Tapioca", U: "Uva", V: "Vagem, Vinagrete",
+    X: "Xerém", Z: "—",
+  },
+  cor: {
+    A: "Amarelo, Azul", B: "Bege, Branco, Bordô", C: "Cinza, Coral, Ciano",
+    D: "Dourado", E: "Esverdeado", F: "Fúcsia",
+    G: "Grená", H: "—", I: "Índigo",
+    J: "—", L: "Lilás, Laranja", M: "Magenta, Marrom, Marfim",
+    N: "Negro", O: "Ocre", P: "Prateado, Púrpura, Preto, Pink",
+    Q: "—", R: "Rosa, Roxo, Ruivo", S: "Salmão",
+    T: "Turquesa, Tijolo", U: "—", V: "Verde, Vermelho, Violeta",
+    X: "—", Z: "—",
+  },
+  cep: {
+    A: "Acre, Argentina, Alagoas, Angola", B: "Bahia, Brasília, Bolívia", C: "Ceará, Canadá, Curitiba, Chile",
+    D: "Distrito Federal", E: "Espírito Santo, Egito, Equador", F: "França, Fortaleza",
+    G: "Goiás, Grécia", H: "Holanda, Honduras", I: "Itália, Israel",
+    J: "Japão, João Pessoa", L: "Londres", M: "Minas Gerais, Maranhão, México, Manaus",
+    N: "Nova York, Noruega", O: "Osasco", P: "Paraná, Pará, Peru, Portugal, Pernambuco",
+    Q: "Quênia", R: "Rio de Janeiro, Roraima, Rondônia, Recife", S: "São Paulo, Sergipe, Suécia, Suíça",
+    T: "Tocantins, Tóquio", U: "Uruguai, Ucrânia", V: "Venezuela, Vitória",
+    X: "Xangai", Z: "Zâmbia",
+  },
+  objeto: {
+    A: "Almofada, Anel", B: "Bolsa, Bicicleta, Boneca", C: "Caneta, Cadeira, Copo",
+    D: "Diamante", E: "Escova, Espelho", F: "Faca, Fone de ouvido",
+    G: "Garrafa, Guarda-chuva", H: "—", I: "Isqueiro",
+    J: "Janela, Jarro", L: "Lâmpada, Livro", M: "Mesa, Mochila",
+    N: "Notebook", O: "Óculos", P: "Panela, Prato, Porta",
+    Q: "Quadro", R: "Relógio, Régua", S: "Sapato, Sofá",
+    T: "Telefone, Tesoura", U: "—", V: "Vaso, Violão",
+    X: "Xícara", Z: "Zíper",
+  },
+  time: {
+    A: "Atlético Mineiro, América", B: "Botafogo, Bahia", C: "Corinthians, Cruzeiro, Chelsea",
+    D: "Deportivo", E: "—", F: "Flamengo, Fluminense",
+    G: "Grêmio", H: "—", I: "Internacional",
+    J: "Juventude", L: "Liverpool", M: "Manchester United, Milan",
+    N: "Náutico", O: "Operário", P: "Palmeiras, Paysandu",
+    Q: "—", R: "Real Madrid, Remo", S: "Santos, São Paulo, Sport",
+    T: "Tottenham", U: "—", V: "Vasco, Vitória",
+    X: "—", Z: "—",
+  },
+  cantorAtor: {
+    A: "Anitta, Alok", B: "Beyoncé", C: "Caetano Veloso, Chico Buarque",
+    D: "Daniela Mercury", E: "Elis Regina", F: "Fábio Jr, Fagner",
+    G: "Gal Costa, Gusttavo Lima", H: "Henrique (Henrique e Juliano)", I: "Ivete Sangalo",
+    J: "Jorge (Jorge e Mateus)", L: "Ludmilla, Luan Santana", M: "Marília Mendonça, Milton Nascimento",
+    N: "Naiara Azevedo", O: "—", P: "Preta Gil",
+    Q: "—", R: "Roberto Carlos, Rita Lee", S: "Simone (Simone e Simaria)",
+    T: "Tim Maia", U: "—", V: "Vanessa da Mata",
+    X: "—", Z: "Zeca Pagodinho",
+  },
+  sogra: {
+    A: "Amorosa, Alegre, Antipática", B: "Brava, Boazinha", C: "Chata, Carinhosa, Curiosa",
+    D: "Divertida, Doce", E: "Engraçada, Exigente", F: "Fofa, Falante",
+    G: "Gentil, Grosseira", H: "Humilde", I: "Impaciente, Inteligente",
+    J: "Justa", L: "Legal, Louca", M: "Meiga, Mandona",
+    N: "Nervosa", O: "Otimista", P: "Paciente, Preocupada",
+    Q: "Querida", R: "Rígida, Risonha", S: "Simpática, Séria",
+    T: "Teimosa, Tranquila", U: "Única", V: "Vaidosa",
+    X: "—", Z: "Zangada",
+  },
+  animal: {
+    A: "Aranha, Águia, Abelha", B: "Baleia, Boi, Borboleta", C: "Cachorro, Cavalo, Coelho",
+    D: "Dinossauro", E: "Elefante", F: "Foca, Formiga",
+    G: "Girafa, Gato, Gambá", H: "Hipopótamo, Hiena", I: "Iguana",
+    J: "Jacaré, Jaguar", L: "Leão, Leopardo", M: "Macaco, Morcego",
+    N: "—", O: "Onça, Ovelha", P: "Pato, Papagaio, Peixe",
+    Q: "—", R: "Rato, Raposa", S: "Sapo, Serpente",
+    T: "Tigre, Tartaruga", U: "Urso, Urubu", V: "Vaca",
+    X: "—", Z: "Zebra",
+  },
+};
+
 const DURACAO_MS = 2 * 60 * 1000;
 const CONTESTACAO_MS = 60 * 1000;
 
@@ -479,7 +575,10 @@ function renderizarTabelaContestacao(sala) {
   const contestacoes = sala.contestacoes || {};
   const tabela = document.getElementById("tabelaContestacao");
 
-  let html = "<thead><tr><th>Categoria</th>" + jogadores.map((n) => `<th>${n}</th>`).join("") + "</tr></thead><tbody>";
+  let html =
+    "<thead><tr><th>Categoria</th>" +
+    jogadores.map((n) => `<th>${n}</th>`).join("") +
+    "<th>Sugestões</th></tr></thead><tbody>";
 
   CATEGORIAS.forEach((categoria) => {
     html += `<tr><td>${categoria.label}</td>`;
@@ -507,6 +606,9 @@ function renderizarTabelaContestacao(sala) {
 
       html += "</div></td>";
     });
+
+    const sugestao = (SUGESTOES[categoria.id] && SUGESTOES[categoria.id][sala.letra]) || "—";
+    html += `<td class="stop-sugestoes">${sugestao}</td>`;
     html += "</tr>";
   });
 

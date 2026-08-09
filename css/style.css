@@ -861,6 +861,14 @@ body {
   font-style: italic;
 }
 
+.stop-sugestoes {
+  color: #888;
+  font-style: italic;
+  font-size: 0.85rem;
+  max-width: 220px;
+  white-space: normal !important;
+}
+
 /* ---------- Mobile ---------- */
 @media (max-width: 600px) {
   .page-wrap {
