@@ -520,4 +520,15 @@ document.getElementById("btnCancelarConvite").addEventListener("click", sairDaSa
    ======================================================================== */
 
 novaPalavra();
-definirModoJogo(lerSalaLocal(JOGO) ? "online" : "solo");
+if (lerSalaLocal(JOGO)) {
+  definirModoJogo("online");
+} else {
+  definirModoJogo("solo");
+  // se já tiver um convite pendente esperando, mostra a aba Online direto
+  // em vez de deixar escondido atrás do botão "Online (1 x 1)"
+  refConvitesDe(JOGO, getUser())
+    .once("value")
+    .then((snap) => {
+      if (snap.exists()) definirModoJogo("online");
+    });
+}

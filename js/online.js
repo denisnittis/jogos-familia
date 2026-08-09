@@ -20,17 +20,26 @@ function refConvitesDe(jogo, nome) {
 
 // Cria a sala com os dados iniciais fornecidos e envia um convite para o
 // oponente. Retorna o salaId (via callback, já que é assíncrono).
+//
+// Guarda o conviteParaNome/conviteId na própria sala pra sairDaSala
+// conseguir limpar o convite pendente caso o convite seja cancelado antes
+// de ser aceito (senão fica um convite "fantasma" apontando pra uma sala
+// que não existe mais).
 function criarSalaEConvidar(jogo, paraNome, dadosIniciais, callback) {
   const novaSalaRef = db.ref(`salas/${jogo}`).push();
   const salaId = novaSalaRef.key;
 
   novaSalaRef.set(dadosIniciais).then(() => {
     const conviteRef = refConvitesDe(jogo, paraNome).push();
-    conviteRef.set({
-      de: getUser(),
-      salaId,
-      criadoEm: firebase.database.ServerValue.TIMESTAMP,
-    });
+    conviteRef
+      .set({
+        de: getUser(),
+        salaId,
+        criadoEm: firebase.database.ServerValue.TIMESTAMP,
+      })
+      .then(() => {
+        novaSalaRef.update({ conviteParaNome: paraNome, conviteId: conviteRef.key });
+      });
     callback(salaId);
   });
 }
@@ -62,8 +71,20 @@ function cancelarSala(jogo, salaId) {
 }
 
 function sairDaSala(jogo, salaId) {
-  refSala(jogo, salaId).off();
-  refSala(jogo, salaId).remove();
+  const salaRef = refSala(jogo, salaId);
+  salaRef.off();
+
+  // Se a sala ainda tinha um convite pendente (ninguém aceitou ainda),
+  // apaga o convite também — senão ele fica pendente pra sempre, apontando
+  // pra uma sala que não existe mais.
+  salaRef.once("value").then((snap) => {
+    const sala = snap.val();
+    if (sala && sala.conviteParaNome && sala.conviteId) {
+      db.ref(`convites/${jogo}/${sala.conviteParaNome}/${sala.conviteId}`).remove();
+    }
+    salaRef.remove();
+  });
+
   limparSalaLocal(jogo);
 }
 

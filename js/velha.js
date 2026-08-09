@@ -432,4 +432,9 @@ if (lerSalaLocal(JOGO)) {
   irParaModoOnline();
 } else {
   definirModoLocal(false);
+  refConvitesDe(JOGO, getUser())
+    .once("value")
+    .then((snap) => {
+      if (snap.exists()) irParaModoOnline();
+    });
 }

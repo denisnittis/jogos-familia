@@ -437,6 +437,21 @@ body {
   color: #5b2a86;
 }
 
+.aviso-convites {
+  border-color: #ffca28;
+  background: #fff8e1;
+}
+
+.aviso-convites h4 {
+  color: #8a6d00;
+}
+
+.aviso-convites-botoes {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .online-linha {
   display: flex;
   gap: 10px;

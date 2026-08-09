@@ -696,4 +696,9 @@ if (lerSalaLocal(JOGO)) {
   irParaModoOnlineBatalha();
 } else {
   irParaModoCpuBatalha();
+  refConvitesDe(JOGO, getUser())
+    .once("value")
+    .then((snap) => {
+      if (snap.exists()) irParaModoOnlineBatalha();
+    });
 }

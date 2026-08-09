@@ -20,6 +20,11 @@
     </div>
   </div>
 
+  <div class="online-painel aviso-convites" id="painelConvitesPendentes" style="display: none">
+    <h4>🔔 Você tem convite(s) esperando resposta!</h4>
+    <div class="aviso-convites-botoes" id="listaConvitesPendentesResumo"></div>
+  </div>
+
   <div class="menu-grid">
     <a class="menu-card" href="forca.html">
       <span class="emoji">🪢</span>
@@ -47,7 +52,14 @@
   </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-init.js"></script>
 <script src="js/auth.js"></script>
+<script src="js/online.js"></script>
+<script src="js/home.js"></script>
 <script>
   document.getElementById("saudacao").textContent = "Olá, " + getUser() + "!";
   document.getElementById("btnSair").addEventListener("click", logout);
