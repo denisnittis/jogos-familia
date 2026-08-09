@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Show do Milhão - Jogos da Família</title>
+<link rel="stylesheet" href="css/style.css" />
+<script>
+  if (!localStorage.getItem("ff_user")) {
+    window.location.href = "index.html";
+  }
+</script>
+</head>
+<body>
+<div class="page-wrap">
+  <div class="top-bar">
+    <h2>💰 Show do Milhão</h2>
+    <div class="actions">
+      <a class="btn btn-secondary" href="home.html">Menu</a>
+      <button class="btn btn-danger" id="btnSair">Sair</button>
+    </div>
+  </div>
+
+  <div class="game-card">
+    <div class="milhao-valor" id="valorAtual"></div>
+    <div class="milhao-pergunta-num" id="perguntaNum"></div>
+    <div class="milhao-pergunta" id="pergunta"></div>
+    <div class="milhao-opcoes" id="opcoes"></div>
+    <div class="status-msg" id="status"></div>
+
+    <div>
+      <button class="btn btn-secondary" id="btnParar">Parar e levar o prêmio</button>
+      <button class="btn btn-primary" id="btnNovo" style="display: none">Jogar de novo</button>
+    </div>
+
+    <ol class="milhao-escada" id="escada"></ol>
+  </div>
+</div>
+
+<script src="js/auth.js"></script>
+<script src="js/milhao.js"></script>
+<script>
+  document.getElementById("btnSair").addEventListener("click", logout);
+</script>
+</body>
+</html>

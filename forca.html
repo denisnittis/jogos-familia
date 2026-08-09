@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Forca - Jogos da Família</title>
+<link rel="stylesheet" href="css/style.css" />
+<script>
+  if (!localStorage.getItem("ff_user")) {
+    window.location.href = "index.html";
+  }
+</script>
+</head>
+<body>
+<div class="page-wrap">
+  <div class="top-bar">
+    <h2>🪢 Forca</h2>
+    <div class="actions">
+      <a class="btn btn-secondary" href="home.html">Menu</a>
+      <button class="btn btn-danger" id="btnSair">Sair</button>
+    </div>
+  </div>
+
+  <div class="game-card">
+    <div class="modo-jogo-select">
+      <button class="btn btn-secondary" id="btnModoSolo">Sozinho</button>
+      <button class="btn btn-secondary" id="btnModoOnline">Online (1 x 1)</button>
+    </div>
+
+    <!-- Modo Solo -->
+    <div id="areaSolo">
+      <pre class="forca-figure" id="figura"></pre>
+      <div class="palavra" id="palavra"></div>
+      <div class="status-msg" id="status"></div>
+      <div class="teclado" id="teclado"></div>
+      <div style="margin-top: 20px">
+        <button class="btn btn-primary" id="btnNovo">Nova palavra</button>
+      </div>
+    </div>
+
+    <!-- Modo Online: lobby -->
+    <div id="areaOnlineLobby" style="display: none">
+      <div class="online-painel" id="painelConvitesRecebidos" style="display: none">
+        <h4>Convites recebidos</h4>
+        <div id="listaConvites"></div>
+      </div>
+
+      <div class="online-painel">
+        <h4>Convidar alguém para jogar</h4>
+        <div class="online-linha">
+          <select id="selecionarOponente"></select>
+          <button class="btn btn-primary" id="btnConvidar">Convidar</button>
+        </div>
+      </div>
+
+      <div class="online-painel" id="painelAguardando" style="display: none">
+        <p class="sala-status" id="textoAguardando"></p>
+        <button class="btn btn-danger" id="btnCancelarConvite">Cancelar</button>
+      </div>
+    </div>
+
+    <!-- Modo Online: partida em andamento -->
+    <div id="areaOnlineJogo" style="display: none">
+      <div class="online-jogadores" id="onlineJogadores"></div>
+      <div class="placar" id="onlinePlacar"></div>
+
+      <div id="onlineEscolhendo" style="display: none">
+        <p class="sala-status" id="textoEscolhendo"></p>
+        <form class="definir-palavra-form" id="formPalavra">
+          <input type="text" id="inputPalavra" placeholder="Digite a palavra" autocomplete="off" />
+          <input type="text" id="inputDica" placeholder="Dica (opcional)" autocomplete="off" />
+          <button class="btn btn-primary" type="submit">Definir palavra</button>
+        </form>
+      </div>
+
+      <div id="onlineJogando" style="display: none">
+        <pre class="forca-figure" id="figuraOnline"></pre>
+        <div class="palavra" id="palavraOnline"></div>
+        <div class="status-msg" id="statusOnline"></div>
+
+        <div id="areaDica" style="display: none">
+          <button class="btn btn-secondary" id="btnVerDica">💡 Ver dica (perde uma chance)</button>
+          <p class="dica-caixa" id="textoDicaRevelada" style="display: none"></p>
+        </div>
+
+        <div class="teclado" id="tecladoOnline"></div>
+      </div>
+
+      <div style="margin-top: 20px">
+        <button class="btn btn-primary" id="btnProximaRodada" style="display: none">Próxima rodada</button>
+        <button class="btn btn-secondary" id="btnSairSala">Sair da sala</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-init.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/online.js"></script>
+<script src="js/forca.js"></script>
+<script>
+  document.getElementById("btnSair").addEventListener("click", logout);
+</script>
+</body>
+</html>

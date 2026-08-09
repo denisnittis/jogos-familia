@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Menu - Jogos da Família</title>
+<link rel="stylesheet" href="css/style.css" />
+<script>
+  if (!localStorage.getItem("ff_user")) {
+    window.location.href = "index.html";
+  }
+</script>
+</head>
+<body>
+<div class="page-wrap">
+  <div class="top-bar">
+    <h2 id="saudacao">Olá!</h2>
+    <div class="actions">
+      <button class="btn btn-danger" id="btnSair">Sair</button>
+    </div>
+  </div>
+
+  <div class="menu-grid">
+    <a class="menu-card" href="forca.html">
+      <span class="emoji">🪢</span>
+      <h3>Forca</h3>
+      <p>Adivinhe a palavra antes que acabem as chances.</p>
+    </a>
+
+    <a class="menu-card" href="velha.html">
+      <span class="emoji">❌⭕</span>
+      <h3>Jogo da Velha</h3>
+      <p>Dois jogadores ou você contra o computador.</p>
+    </a>
+
+    <a class="menu-card" href="batalha.html">
+      <span class="emoji">🚢</span>
+      <h3>Batalha Naval</h3>
+      <p>Posicione sua frota e afunde os navios do adversário.</p>
+    </a>
+
+    <a class="menu-card" href="stop.html">
+      <span class="emoji">🛑</span>
+      <h3>Stop</h3>
+      <p>Nome, fruta, cor... quem for mais rápido e original pontua mais.</p>
+    </a>
+  </div>
+</div>
+
+<script src="js/auth.js"></script>
+<script>
+  document.getElementById("saudacao").textContent = "Olá, " + getUser() + "!";
+  document.getElementById("btnSair").addEventListener("click", logout);
+</script>
+</body>
+</html>

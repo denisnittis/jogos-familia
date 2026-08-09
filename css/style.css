@@ -1,0 +1,1017 @@
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: linear-gradient(135deg, #6a3093, #a044ff, #ff6b6b);
+  background-attachment: fixed;
+  color: #222;
+  overflow-x: hidden;
+}
+
+/* ---------- Login ---------- */
+.login-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.login-card {
+  background: #ffffffee;
+  border-radius: 18px;
+  padding: 40px 32px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  text-align: center;
+}
+
+.login-card h1 {
+  margin-top: 0;
+  font-size: 1.6rem;
+  color: #5b2a86;
+}
+
+.login-card label {
+  display: block;
+  text-align: left;
+  font-weight: 600;
+  margin: 16px 0 6px;
+  color: #444;
+}
+
+.login-card select,
+.login-card input {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  border-radius: 10px;
+  border: 2px solid #ddd;
+  outline: none;
+}
+
+.login-card select:focus,
+.login-card input:focus {
+  border-color: #a044ff;
+}
+
+.login-card button {
+  margin-top: 22px;
+  width: 100%;
+  padding: 13px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #a044ff, #6a3093);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.login-card button:hover {
+  transform: translateY(-2px);
+}
+
+.error-msg {
+  color: #d32f2f;
+  min-height: 20px;
+  margin-top: 12px;
+  font-weight: 600;
+}
+
+/* ---------- Shell / header comum ---------- */
+.page-wrap {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 16px 60px;
+}
+
+.top-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: #ffffffee;
+  padding: 14px 18px;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  margin-bottom: 22px;
+}
+
+.top-bar h2 {
+  margin: 0;
+  color: #5b2a86;
+  font-size: 1.2rem;
+}
+
+.top-bar .actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.btn {
+  display: inline-block;
+  padding: 9px 18px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #a044ff, #6a3093);
+  color: #fff;
+}
+
+.btn-secondary {
+  background: #eee;
+  color: #444;
+}
+
+.btn-danger {
+  background: #ff6b6b;
+  color: #fff;
+}
+
+/* ---------- Menu ---------- */
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 22px;
+}
+
+.menu-card {
+  background: #ffffffee;
+  border-radius: 16px;
+  padding: 30px 20px;
+  text-align: center;
+  text-decoration: none;
+  color: #333;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease;
+}
+
+.menu-card:hover {
+  transform: translateY(-6px);
+}
+
+.menu-card .emoji {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.menu-card h3 {
+  margin: 0 0 6px;
+  color: #5b2a86;
+}
+
+.menu-card p {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.menu-card.disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ---------- Card genérico de jogo ---------- */
+.game-card {
+  background: #ffffffee;
+  border-radius: 16px;
+  padding: 26px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+  text-align: center;
+}
+
+.game-card h1 {
+  color: #5b2a86;
+  margin-top: 0;
+}
+
+/* ---------- Forca ---------- */
+.forca-figure {
+  font-family: monospace;
+  white-space: pre;
+  font-size: 1rem;
+  background: #1e1e2f;
+  color: #ffe08a;
+  padding: 14px;
+  border-radius: 10px;
+  display: inline-block;
+  text-align: left;
+  margin-bottom: 18px;
+}
+
+.palavra {
+  font-size: 2rem;
+  letter-spacing: 8px;
+  font-weight: 700;
+  margin: 18px 0;
+  color: #333;
+}
+
+.teclado {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.tecla {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  border: none;
+  background: #eee;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.tecla:hover:not(:disabled) {
+  background: #d8c3ff;
+}
+
+.tecla:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.tecla.certa {
+  background: #6bcf6b;
+  color: #fff;
+}
+
+.tecla.errada {
+  background: #ff6b6b;
+  color: #fff;
+}
+
+.status-msg {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 16px 0;
+  min-height: 28px;
+}
+
+.status-msg.win {
+  color: #2e8b2e;
+}
+
+.status-msg.lose {
+  color: #d32f2f;
+}
+
+/* ---------- Jogo da velha ---------- */
+.modo-select {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.velha-board {
+  display: grid;
+  grid-template-columns: repeat(3, 90px);
+  grid-template-rows: repeat(3, 90px);
+  gap: 8px;
+  justify-content: center;
+  margin: 20px auto;
+}
+
+.velha-cel {
+  background: #f2eaff;
+  border: none;
+  border-radius: 10px;
+  font-size: 2.4rem;
+  font-weight: 800;
+  cursor: pointer;
+  color: #5b2a86;
+}
+
+.velha-cel:hover:not(:disabled) {
+  background: #e2cfff;
+}
+
+.velha-cel:disabled {
+  cursor: default;
+}
+
+.placar {
+  display: flex;
+  justify-content: center;
+  gap: 26px;
+  margin: 14px 0;
+  font-weight: 700;
+}
+
+/* ---------- Show do Milhão ---------- */
+.milhao-valor {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #2e8b2e;
+  margin-bottom: 6px;
+}
+
+.milhao-pergunta-num {
+  color: #888;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.milhao-pergunta {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 22px;
+  color: #333;
+}
+
+.milhao-opcoes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.milhao-opcao {
+  padding: 14px;
+  border-radius: 10px;
+  border: 2px solid #d8c3ff;
+  background: #faf7ff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+}
+
+.milhao-opcao:hover:not(:disabled) {
+  background: #ecdcff;
+}
+
+.milhao-opcao:disabled {
+  cursor: default;
+}
+
+.milhao-opcao.certa {
+  background: #6bcf6b;
+  border-color: #6bcf6b;
+  color: #fff;
+}
+
+.milhao-opcao.errada {
+  background: #ff6b6b;
+  border-color: #ff6b6b;
+  color: #fff;
+}
+
+.milhao-escada {
+  list-style: none;
+  padding: 0;
+  margin: 22px 0 0;
+  max-height: 260px;
+  overflow-y: auto;
+  border-top: 1px solid #eee;
+}
+
+.milhao-escada li {
+  padding: 6px 10px;
+  font-weight: 600;
+  color: #999;
+}
+
+.milhao-escada li.atual {
+  background: #f2eaff;
+  color: #5b2a86;
+  border-radius: 8px;
+}
+
+.milhao-escada li.garantido {
+  color: #2e8b2e;
+}
+
+/* ---------- Modo Online (lobby, convites, salas) ---------- */
+.modo-jogo-select {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.online-painel {
+  text-align: left;
+  background: #faf7ff;
+  border: 2px solid #ecdcff;
+  border-radius: 14px;
+  padding: 18px 20px;
+  margin-bottom: 20px;
+}
+
+.online-painel h4 {
+  margin: 0 0 12px;
+  color: #5b2a86;
+}
+
+.online-linha {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.online-linha select {
+  padding: 10px;
+  border-radius: 8px;
+  border: 2px solid #d8c3ff;
+  font-size: 0.95rem;
+  flex: 1 1 160px;
+}
+
+.convite-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border: 2px solid #d8c3ff;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.convite-item span {
+  font-weight: 600;
+  color: #444;
+}
+
+.convite-acoes {
+  display: flex;
+  gap: 8px;
+}
+
+.sala-status {
+  font-weight: 700;
+  color: #5b2a86;
+  margin: 6px 0 14px;
+}
+
+.badge-papel {
+  display: inline-block;
+  background: #a044ff;
+  color: #fff;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.online-jogadores {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-weight: 700;
+  color: #444;
+  margin-bottom: 12px;
+}
+
+.online-jogadores .voce {
+  color: #5b2a86;
+}
+
+.definir-palavra-form {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 18px 0;
+}
+
+.definir-palavra-form input {
+  padding: 12px;
+  border-radius: 8px;
+  border: 2px solid #d8c3ff;
+  font-size: 1rem;
+  text-transform: uppercase;
+  max-width: 260px;
+}
+
+#inputDica {
+  text-transform: none;
+}
+
+#areaDica {
+  margin: 14px 0;
+}
+
+.dica-caixa {
+  display: inline-block;
+  background: #fff8e1;
+  border: 2px dashed #ffca28;
+  border-radius: 10px;
+  padding: 10px 16px;
+  margin: 10px 0 0;
+  font-weight: 600;
+  color: #8a6d00;
+}
+
+/* ---------- Batalha Naval ---------- */
+.naval-boards {
+  display: flex;
+  gap: 30px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 18px 0;
+}
+
+.naval-coluna h4 {
+  color: #5b2a86;
+  margin: 0 0 8px;
+  text-align: center;
+}
+
+.naval-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 30px);
+  grid-template-rows: repeat(10, 30px);
+  gap: 2px;
+  background: #b8d8f0;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.naval-cel {
+  width: 30px;
+  height: 30px;
+  background: #dceeff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.naval-cel:hover:not(:disabled) {
+  filter: brightness(0.95);
+}
+
+.naval-cel:disabled {
+  cursor: default;
+}
+
+.naval-cel.navio {
+  background: #5b2a86;
+}
+
+.naval-cel.preview {
+  background: #c7a3ff;
+}
+
+.naval-cel.preview-invalido {
+  background: #ffb3b3;
+}
+
+.naval-cel.agua {
+  background: #7fb2da;
+}
+
+.naval-cel.acerto {
+  background: #ff6b6b;
+}
+
+.naval-cel.afundado {
+  background: #7a1f1f;
+}
+
+.naval-legenda {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 10px;
+}
+
+.naval-frota {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 14px 0;
+}
+
+.naval-navio-btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 2px solid #d8c3ff;
+  background: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.naval-navio-btn.selecionado {
+  background: #a044ff;
+  color: #fff;
+}
+
+.naval-navio-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+/* ---------- Stop ---------- */
+.stop-lista-salas {
+  margin-top: 10px;
+}
+
+.stop-sala-vazia {
+  color: #888;
+  font-style: italic;
+}
+
+.stop-jogadores-espera {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin: 16px 0;
+}
+
+.stop-jogador-badge {
+  background: #f2eaff;
+  color: #5b2a86;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.stop-topo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+
+.stop-letra {
+  font-size: 3.4rem;
+  font-weight: 800;
+  color: #5b2a86;
+  background: #f2eaff;
+  border-radius: 16px;
+  width: 84px;
+  height: 84px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stop-timer {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #2e8b2e;
+  font-variant-numeric: tabular-nums;
+}
+
+.stop-timer.urgente {
+  color: #d32f2f;
+}
+
+.stop-categorias {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+  margin-bottom: 22px;
+  text-align: left;
+}
+
+.stop-categoria label {
+  display: block;
+  font-weight: 700;
+  color: #5b2a86;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+}
+
+.stop-categoria input {
+  width: 100%;
+  padding: 11px;
+  border-radius: 8px;
+  border: 2px solid #d8c3ff;
+  font-size: 1rem;
+  text-transform: uppercase;
+}
+
+.stop-categoria input:disabled {
+  background: #f4f4f4;
+  color: #999;
+}
+
+.stop-tabela-wrap {
+  overflow-x: auto;
+  margin: 18px 0;
+}
+
+.stop-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 480px;
+}
+
+.stop-tabela th,
+.stop-tabela td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.stop-tabela th {
+  color: #5b2a86;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+}
+
+.stop-resposta-10 {
+  color: #2e8b2e;
+  font-weight: 700;
+}
+
+.stop-resposta-5 {
+  color: #1565c0;
+  font-weight: 700;
+}
+
+.stop-resposta-0 {
+  color: #aaa;
+  text-decoration: line-through;
+}
+
+.stop-pontos {
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-left: 6px;
+  opacity: 0.8;
+}
+
+.stop-tabela tr.stop-total td {
+  font-weight: 800;
+  border-top: 2px solid #d8c3ff;
+  border-bottom: none;
+}
+
+.stop-resposta-celula {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+.stop-sua-resposta {
+  color: #999;
+  font-size: 0.75rem;
+  font-style: italic;
+}
+
+.btn-contestar {
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 2px solid #ffb3b3;
+  background: #fff5f5;
+  color: #c62828;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-contestar.contestada-por-mim {
+  background: #d32f2f;
+  border-color: #d32f2f;
+  color: #fff;
+}
+
+.stop-contagem-contestacao {
+  font-size: 0.72rem;
+  color: #c62828;
+  font-weight: 700;
+}
+
+.stop-contagem-votos {
+  font-size: 0.8rem;
+  color: #5b2a86;
+  font-weight: 700;
+  margin-left: 8px;
+}
+
+.stop-tag-contestada {
+  font-size: 0.72rem;
+  color: #c62828;
+  font-weight: 700;
+  font-style: italic;
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 600px) {
+  .page-wrap {
+    padding: 14px 10px 44px;
+  }
+
+  .login-body {
+    padding: 12px;
+  }
+
+  .login-card {
+    padding: 28px 20px;
+    border-radius: 14px;
+  }
+
+  .top-bar {
+    padding: 12px 14px;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .top-bar h2 {
+    width: 100%;
+    text-align: center;
+  }
+
+  .top-bar .actions {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .btn {
+    padding: 11px 16px;
+    font-size: 0.95rem;
+  }
+
+  .game-card {
+    padding: 18px 14px;
+    border-radius: 14px;
+  }
+
+  .menu-card {
+    padding: 24px 16px;
+  }
+
+  .forca-figure {
+    font-size: 0.85rem;
+    padding: 10px;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .palavra {
+    font-size: 1.4rem;
+    letter-spacing: 4px;
+    word-break: break-all;
+  }
+
+  .teclado {
+    gap: 5px;
+    max-width: 100%;
+  }
+
+  .tecla {
+    width: 15.5vw;
+    height: 15.5vw;
+    max-width: 42px;
+    max-height: 42px;
+    min-width: 30px;
+    min-height: 30px;
+    font-size: 0.95rem;
+    padding: 0;
+  }
+
+  .modo-select {
+    gap: 8px;
+  }
+
+  .modo-select .btn {
+    flex: 1 1 auto;
+    min-width: 140px;
+  }
+
+  .velha-board {
+    grid-template-columns: repeat(3, minmax(72px, 1fr));
+    grid-template-rows: repeat(3, minmax(72px, 22vw));
+    max-width: 320px;
+    gap: 8px;
+  }
+
+  .velha-cel {
+    font-size: 2rem;
+  }
+
+  .placar {
+    gap: 16px;
+    font-size: 0.95rem;
+  }
+
+  .milhao-pergunta {
+    font-size: 1.1rem;
+  }
+
+  .milhao-opcao {
+    padding: 12px;
+    font-size: 0.95rem;
+  }
+
+  .milhao-valor {
+    font-size: 1.3rem;
+  }
+
+  .online-painel {
+    padding: 14px;
+  }
+
+  .online-linha select {
+    flex: 1 1 100%;
+  }
+
+  .definir-palavra-form input {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .naval-boards {
+    gap: 18px;
+  }
+
+  .naval-grid {
+    grid-template-columns: repeat(10, 7.6vw);
+    grid-template-rows: repeat(10, 7.6vw);
+    max-width: 320px;
+  }
+
+  .naval-cel {
+    width: 7.6vw;
+    height: 7.6vw;
+    max-width: 30px;
+    max-height: 30px;
+    font-size: 0.7rem;
+  }
+
+  .naval-navio-btn {
+    padding: 7px 10px;
+    font-size: 0.85rem;
+  }
+
+  .stop-letra {
+    width: 68px;
+    height: 68px;
+    font-size: 2.6rem;
+  }
+
+  .stop-timer {
+    font-size: 1.6rem;
+  }
+
+  .stop-categorias {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 360px) {
+  .tecla {
+    width: 14vw;
+    height: 14vw;
+  }
+}

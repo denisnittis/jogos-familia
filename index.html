@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Jogos da Família</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="login-body">
+<div class="login-card">
+  <h1>🎉 Jogos da Família</h1>
+  <form id="loginForm">
+    <label for="username">Quem é você?</label>
+    <select id="username" required>
+      <option value="">Selecione...</option>
+      <option>Daniel</option>
+      <option>Debora</option>
+      <option>Denis</option>
+      <option>Diego</option>
+      <option>Danielle</option>
+      <option>Denise</option>
+      <option>Giovanna</option>
+      <option>Murilo</option>
+      <option>Fabiola</option>
+    </select>
+
+    <label for="password">Senha</label>
+    <input type="password" id="password" required autocomplete="current-password" />
+
+    <button type="submit">Entrar</button>
+    <p class="error-msg" id="error"></p>
+  </form>
+</div>
+
+<script src="js/auth.js"></script>
+<script>
+  // se já estiver logado, pula direto pro menu
+  if (getUser()) {
+    window.location.href = "home.html";
+  }
+
+  document.getElementById("loginForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    const user = document.getElementById("username").value;
+    const pass = document.getElementById("password").value;
+    if (checkLogin(user, pass)) {
+      window.location.href = "home.html";
+    } else {
+      document.getElementById("error").textContent = "Usuário ou senha incorretos.";
+    }
+  });
+</script>
+</body>
+</html>

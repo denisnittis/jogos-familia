@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Stop - Jogos da Família</title>
+<link rel="stylesheet" href="css/style.css" />
+<script>
+  if (!localStorage.getItem("ff_user")) {
+    window.location.href = "index.html";
+  }
+</script>
+</head>
+<body>
+<div class="page-wrap">
+  <div class="top-bar">
+    <h2>🛑 Stop</h2>
+    <div class="actions">
+      <a class="btn btn-secondary" href="home.html">Menu</a>
+      <button class="btn btn-danger" id="btnSair">Sair</button>
+    </div>
+  </div>
+
+  <div class="game-card">
+    <!-- Lobby: criar sala ou entrar numa sala aberta -->
+    <div id="areaLobby">
+      <p>O Stop é jogado em grupo (2 ou mais). Crie uma sala e chame a família, ou entre numa sala já aberta.</p>
+      <button class="btn btn-primary" id="btnCriarSala">Criar sala</button>
+
+      <div class="online-painel" style="margin-top: 20px">
+        <h4>Salas abertas</h4>
+        <div class="stop-lista-salas" id="listaSalas">
+          <p class="stop-sala-vazia">Nenhuma sala aberta no momento.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sala de espera -->
+    <div id="areaEspera" style="display: none">
+      <p class="sala-status">Sala de <span id="esperaCriador"></span> — aguardando jogadores...</p>
+      <div class="stop-jogadores-espera" id="esperaJogadores"></div>
+      <button class="btn btn-primary" id="btnIniciarRodada">Iniciar rodada</button>
+      <button class="btn btn-secondary" id="btnSairSalaEspera">Sair da sala</button>
+      <p id="avisoMinimoJogadores" style="display: none; color: #d32f2f; font-weight: 600; margin-top: 10px">
+        Precisa de pelo menos 2 jogadores pra começar.
+      </p>
+    </div>
+
+    <!-- Rodada em andamento -->
+    <div id="areaJogando" style="display: none">
+      <div class="stop-topo">
+        <div class="stop-letra" id="stopLetra"></div>
+        <div class="stop-timer" id="stopTimer">2:00</div>
+      </div>
+
+      <div style="text-align: center; margin-bottom: 18px">
+        <button type="button" class="btn btn-secondary" id="btnTrocarLetra">🔄 Trocar letra</button>
+        <span class="stop-contagem-votos" id="votosTrocarLetraTexto"></span>
+      </div>
+
+      <form id="formCategorias" class="stop-categorias"></form>
+
+      <p class="status-msg" id="statusJogando"></p>
+    </div>
+
+    <!-- Contestação: revisão das respostas antes de fechar a pontuação -->
+    <div id="areaContestacao" style="display: none">
+      <div class="stop-topo">
+        <div class="stop-timer" id="contestacaoTimer">0:30</div>
+      </div>
+      <p>
+        Alguém escreveu algo que não vale? Clique em <strong>Contestar</strong>. Se a
+        maioria dos outros jogadores concordar, a resposta não pontua.
+      </p>
+
+      <div class="stop-tabela-wrap">
+        <table class="stop-tabela" id="tabelaContestacao"></table>
+      </div>
+    </div>
+
+    <!-- Resultado da rodada -->
+    <div id="areaResultado" style="display: none">
+      <p class="sala-status">Letra sorteada: <span id="resultadoLetra"></span></p>
+
+      <div class="stop-tabela-wrap">
+        <table class="stop-tabela" id="tabelaResultado"></table>
+      </div>
+
+      <div class="placar" id="placarTotal"></div>
+
+      <div style="margin-top: 20px">
+        <button class="btn btn-primary" id="btnNovaRodada">Nova rodada</button>
+        <button class="btn btn-secondary" id="btnSairSalaResultado">Sair da sala</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-init.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/online.js"></script>
+<script src="js/stop.js"></script>
+<script>
+  document.getElementById("btnSair").addEventListener("click", logout);
+</script>
+</body>
+</html>
