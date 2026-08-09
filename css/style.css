@@ -414,6 +414,81 @@ body {
   color: #2e8b2e;
 }
 
+#milhaoTimer {
+  margin: 0 auto 14px;
+}
+
+.milhao-ajudas {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 18px 0;
+}
+
+.milhao-ajudas button:disabled {
+  opacity: 0.4;
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+
+.milhao-cartas-painel {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 18px 0;
+}
+
+.carta-btn {
+  font-size: 1.3rem;
+  padding: 22px 26px;
+}
+
+.milhao-universitarios {
+  margin: 18px 0;
+  text-align: left;
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.milhao-uni-linha {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.milhao-uni-letra {
+  width: 22px;
+  font-weight: 700;
+  color: #5b2a86;
+}
+
+.milhao-uni-trilha {
+  flex: 1;
+  background: #eee;
+  border-radius: 6px;
+  overflow: hidden;
+  height: 20px;
+}
+
+.milhao-uni-preenchimento {
+  height: 100%;
+  background: linear-gradient(135deg, #a044ff, #6a3093);
+  border-radius: 6px;
+}
+
+.milhao-uni-percentual {
+  width: 42px;
+  text-align: right;
+  font-weight: 700;
+  color: #444;
+  font-size: 0.85rem;
+}
+
 /* ---------- Modo Online (lobby, convites, salas) ---------- */
 .modo-jogo-select {
   display: flex;

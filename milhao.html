@@ -22,18 +22,45 @@
   </div>
 
   <div class="game-card">
-    <div class="milhao-valor" id="valorAtual"></div>
-    <div class="milhao-pergunta-num" id="perguntaNum"></div>
-    <div class="milhao-pergunta" id="pergunta"></div>
-    <div class="milhao-opcoes" id="opcoes"></div>
-    <div class="status-msg" id="status"></div>
-
-    <div>
-      <button class="btn btn-secondary" id="btnParar">Parar e levar o prêmio</button>
-      <button class="btn btn-primary" id="btnNovo" style="display: none">Jogar de novo</button>
+    <!-- Escolha de tema -->
+    <div id="areaTemas">
+      <h3>Escolha um tema</h3>
+      <div class="menu-grid" id="listaTemas"></div>
     </div>
 
-    <ol class="milhao-escada" id="escada"></ol>
+    <!-- Escolha de subcategoria (só Esportes, por enquanto) -->
+    <div id="areaSubcategorias" style="display: none">
+      <h3>Escolha a subcategoria</h3>
+      <div class="menu-grid" id="listaSubcategorias"></div>
+      <button class="btn btn-secondary" id="btnVoltarTemas" style="margin-top: 16px">← Voltar</button>
+    </div>
+
+    <!-- Partida -->
+    <div id="areaJogoMilhao" style="display: none">
+      <div class="milhao-valor" id="valorAtual"></div>
+      <div class="milhao-pergunta-num" id="perguntaNum"></div>
+      <div class="stop-timer" id="milhaoTimer">1:00</div>
+      <div class="milhao-pergunta" id="pergunta"></div>
+      <div class="milhao-opcoes" id="opcoes"></div>
+      <div class="status-msg" id="status"></div>
+
+      <div class="milhao-ajudas">
+        <button class="btn btn-secondary" id="btnPular">⏭️ Pulei</button>
+        <button class="btn btn-secondary" id="btnCartas">🎴 Cartas</button>
+        <button class="btn btn-secondary" id="btnUniversitarios">🎓 Universitários</button>
+      </div>
+
+      <div id="painelCartas" class="milhao-cartas-painel" style="display: none"></div>
+      <p id="resultadoCartas" class="stop-sua-resposta" style="display: none"></p>
+      <div id="painelUniversitarios" class="milhao-universitarios" style="display: none"></div>
+
+      <div style="margin-top: 16px">
+        <button class="btn btn-secondary" id="btnParar">Parar e levar o prêmio</button>
+        <button class="btn btn-primary" id="btnNovo" style="display: none">Jogar de novo</button>
+      </div>
+
+      <ol class="milhao-escada" id="escada"></ol>
+    </div>
   </div>
 </div>
 
