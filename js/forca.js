@@ -63,6 +63,7 @@ const ESTAGIOS = [
 
 const MAX_ERROS = ESTAGIOS.length - 1;
 const ALFABETO = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const TEMPO_LETRA_MS = 60 * 1000;
 
 /* ========================================================================
    MODO SOLO
@@ -164,6 +165,7 @@ const btnModoOnline = document.getElementById("btnModoOnline");
 
 function definirModoJogo(modo) {
   if (modo === "solo" && salaAtual) {
+    pararTimerProximaLetra();
     sairDaSala(JOGO, salaAtual.id);
     salaAtual = null;
   }
@@ -322,6 +324,7 @@ function renderizarSala(sala) {
   const btnProxima = document.getElementById("btnProximaRodada");
 
   if (rodada.status === "escolhendo") {
+    pararTimerProximaLetra();
     elJogando.style.display = "none";
     btnProxima.style.display = "none";
     elEscolhendo.style.display = "block";
@@ -348,7 +351,17 @@ function renderizarSala(sala) {
 function renderizarJogoOnline(sala, rodada, souEscolhedor) {
   const certas = rodada.letrasCertas || {};
   const erradas = rodada.letrasErradas || {};
-  const numErradas = Object.keys(erradas).length + (rodada.dicaUsada ? 1 : 0);
+  const numErradas =
+    Object.keys(erradas).length + (rodada.dicaUsada ? 1 : 0) + (rodada.temposEsgotados || 0);
+  const fimDeRodada = rodada.status === "venceu" || rodada.status === "perdeu";
+
+  if (fimDeRodada) {
+    pararTimerProximaLetra();
+  } else {
+    proximaLetraTerminaEmAtual = rodada.proximaLetraTerminaEm || null;
+    document.getElementById("legendaTempoLetra").style.display = "block";
+    iniciarTimerProximaLetra();
+  }
 
   document.getElementById("figuraOnline").textContent = ESTAGIOS[Math.min(numErradas, MAX_ERROS)];
   document.getElementById("palavraOnline").textContent = rodada.palavra
@@ -371,8 +384,6 @@ function renderizarJogoOnline(sala, rodada, souEscolhedor) {
     elStatusOnline.textContent = souEscolhedor ? "Aguardando o adversário tentar..." : "";
     elStatusOnline.className = "status-msg";
   }
-
-  const fimDeRodada = rodada.status === "venceu" || rodada.status === "perdeu";
 
   const areaDica = document.getElementById("areaDica");
   const btnVerDica = document.getElementById("btnVerDica");
@@ -420,7 +431,16 @@ document.getElementById("formPalavra").addEventListener("submit", (e) => {
   const dica = inputDica.value.trim().slice(0, 80);
 
   refSala(JOGO, salaAtual.id).update({
-    rodada: { palavra, dica, dicaUsada: false, letrasCertas: {}, letrasErradas: {}, status: "jogando" },
+    rodada: {
+      palavra,
+      dica,
+      dicaUsada: false,
+      letrasCertas: {},
+      letrasErradas: {},
+      temposEsgotados: 0,
+      proximaLetraTerminaEm: Date.now() + TEMPO_LETRA_MS,
+      status: "jogando",
+    },
   });
   inputPalavra.value = "";
   inputDica.value = "";
@@ -449,13 +469,15 @@ function chutarOnline(letra) {
     }
 
     const ganhou = rodada.palavra.split("").every((l) => certas[l]);
-    const totalErros = Object.keys(erradas).length + (rodada.dicaUsada ? 1 : 0);
+    const totalErros =
+      Object.keys(erradas).length + (rodada.dicaUsada ? 1 : 0) + (rodada.temposEsgotados || 0);
     const perdeu = totalErros >= MAX_ERROS;
 
     rodada.letrasCertas = certas;
     rodada.letrasErradas = erradas;
     if (ganhou) rodada.status = "venceu";
     else if (perdeu) rodada.status = "perdeu";
+    else rodada.proximaLetraTerminaEm = Date.now() + TEMPO_LETRA_MS; // nova chance, novo minuto
     return rodada;
   }, (erro, sucesso, snapshot) => {
     if (sucesso && snapshot.val() && snapshot.val().status === "venceu") {
@@ -475,15 +497,81 @@ function verDicaOnline() {
     if (!rodada || rodada.status !== "jogando" || rodada.dicaUsada || !rodada.dica) return rodada;
 
     const erradas = rodada.letrasErradas || {};
-    const totalErros = Object.keys(erradas).length + 1;
+    const totalErros = Object.keys(erradas).length + 1 + (rodada.temposEsgotados || 0);
 
     rodada.dicaUsada = true;
     if (totalErros >= MAX_ERROS) rodada.status = "perdeu";
+    else rodada.proximaLetraTerminaEm = Date.now() + TEMPO_LETRA_MS; // viu a dica, novo minuto pra chutar
     return rodada;
   });
 }
 
 document.getElementById("btnVerDica").addEventListener("click", verDicaOnline);
+
+// Se o adivinhador demorar mais de 1 minuto sem escolher uma letra, conta
+// como se tivesse errado uma (mesma penalidade da dica). Mesmo padrão de
+// transaction: só quem "pegar" o prazo já vencido aplica a penalidade, e a
+// checagem "Date.now() < proximaLetraTerminaEm" evita duplicar se dois
+// clientes tentarem ao mesmo tempo.
+function aplicarTimeoutLetra() {
+  if (!salaAtual) return;
+  const rodadaRef = refSala(JOGO, salaAtual.id).child("rodada");
+
+  rodadaRef.transaction((rodada) => {
+    if (!rodada || rodada.status !== "jogando") return rodada;
+    if (!rodada.proximaLetraTerminaEm || Date.now() < rodada.proximaLetraTerminaEm) return rodada;
+
+    const erradas = rodada.letrasErradas || {};
+    const temposEsgotados = (rodada.temposEsgotados || 0) + 1;
+    const totalErros = Object.keys(erradas).length + (rodada.dicaUsada ? 1 : 0) + temposEsgotados;
+
+    rodada.temposEsgotados = temposEsgotados;
+    if (totalErros >= MAX_ERROS) {
+      rodada.status = "perdeu";
+    } else {
+      rodada.proximaLetraTerminaEm = Date.now() + TEMPO_LETRA_MS;
+    }
+    return rodada;
+  });
+}
+
+let proximaLetraTerminaEmAtual = null;
+let timerProximaLetraId = null;
+
+function iniciarTimerProximaLetra() {
+  if (timerProximaLetraId) return;
+  timerProximaLetraId = setInterval(tickProximaLetra, 500);
+}
+
+function pararTimerProximaLetra() {
+  if (timerProximaLetraId) {
+    clearInterval(timerProximaLetraId);
+    timerProximaLetraId = null;
+  }
+  proximaLetraTerminaEmAtual = null;
+  document.getElementById("tempoProximaLetra").textContent = "";
+  document.getElementById("legendaTempoLetra").style.display = "none";
+}
+
+function tickProximaLetra() {
+  const el = document.getElementById("tempoProximaLetra");
+  if (!proximaLetraTerminaEmAtual) {
+    el.textContent = "";
+    return;
+  }
+
+  const restante = proximaLetraTerminaEmAtual - Date.now();
+  if (restante <= 0) {
+    el.textContent = "0:00";
+    el.classList.add("urgente");
+    aplicarTimeoutLetra();
+    return;
+  }
+
+  const segundos = Math.ceil(restante / 1000);
+  el.textContent = `0:${String(segundos).padStart(2, "0")}`;
+  el.classList.toggle("urgente", segundos <= 10);
+}
 
 document.getElementById("btnProximaRodada").addEventListener("click", () => {
   if (!salaAtual) return;
@@ -497,12 +585,22 @@ document.getElementById("btnProximaRodada").addEventListener("click", () => {
           escolhedor: sala.jogadores.adivinhador,
           adivinhador: sala.jogadores.escolhedor,
         },
-        rodada: { palavra: "", dica: "", dicaUsada: false, letrasCertas: {}, letrasErradas: {}, status: "escolhendo" },
+        rodada: {
+          palavra: "",
+          dica: "",
+          dicaUsada: false,
+          letrasCertas: {},
+          letrasErradas: {},
+          temposEsgotados: 0,
+          proximaLetraTerminaEm: null,
+          status: "escolhendo",
+        },
       });
     });
 });
 
 function sairDaSalaClique() {
+  pararTimerProximaLetra();
   if (salaAtual) {
     sairDaSala(JOGO, salaAtual.id);
   }
