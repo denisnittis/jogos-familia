@@ -302,6 +302,19 @@ function embaralhar(arr) {
     .map((p) => p[1]);
 }
 
+// No banco de perguntas a resposta certa está sempre escrita na posição 0
+// (mais fácil de escrever/revisar), então precisa embaralhar a ordem das
+// alternativas aqui — senão a certa fica sempre na mesma posição na tela.
+function embaralharOpcoes(q) {
+  const opcoesComFlag = q.opcoes.map((texto, i) => ({ texto, eraCerta: i === q.certa }));
+  const embaralhadas = embaralhar(opcoesComFlag);
+  return {
+    ...q,
+    opcoes: embaralhadas.map((o) => o.texto),
+    certa: embaralhadas.findIndex((o) => o.eraCerta),
+  };
+}
+
 function montarPerguntasDaPartida(poolId) {
   const banco = BANCO_PERGUNTAS[poolId] || [];
   const porNivel = { 1: [], 2: [], 3: [] };
@@ -312,8 +325,8 @@ function montarPerguntasDaPartida(poolId) {
 
   [1, 2, 3].forEach((nivel) => {
     const embaralhadas = embaralhar(porNivel[nivel]);
-    escolhidas[nivel] = embaralhadas.slice(0, 5);
-    sobras[nivel] = embaralhadas.slice(5); // spares pra usar no "Pulei"
+    escolhidas[nivel] = embaralhadas.slice(0, 5).map(embaralharOpcoes);
+    sobras[nivel] = embaralhadas.slice(5).map(embaralharOpcoes); // spares pra usar no "Pulei"
   });
 
   const perguntas = [...escolhidas[1], ...escolhidas[2], ...escolhidas[3]].map((q, i) => ({
