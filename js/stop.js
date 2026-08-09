@@ -732,8 +732,16 @@ function sairDaSalaStop() {
   mostrarLobby();
 }
 
-document.getElementById("btnSairSalaEspera").addEventListener("click", sairDaSalaStop);
-document.getElementById("btnSairSalaResultado").addEventListener("click", sairDaSalaStop);
+function confirmarESairDaSala() {
+  if (confirm("Tem certeza que quer sair da sala?")) {
+    sairDaSalaStop();
+  }
+}
+
+document.getElementById("btnSairSalaEspera").addEventListener("click", confirmarESairDaSala);
+document.getElementById("btnSairSalaResultado").addEventListener("click", confirmarESairDaSala);
+document.getElementById("btnSairSalaJogando").addEventListener("click", confirmarESairDaSala);
+document.getElementById("btnSairSalaContestacao").addEventListener("click", confirmarESairDaSala);
 
 // Diferente de sairDaSalaStop (que só tira o jogador da lista e apaga a
 // sala se ele for o último): isso apaga a sala inteira na hora, pra todo
@@ -752,8 +760,14 @@ function cancelarSalaStop() {
   mostrarLobby();
 }
 
-document.getElementById("btnCancelarSalaEspera").addEventListener("click", cancelarSalaStop);
-document.getElementById("btnCancelarSalaResultado").addEventListener("click", cancelarSalaStop);
+function confirmarECancelarSala() {
+  if (confirm("Cancelar a sala pra todo mundo? Quem estiver jogando volta pro lobby.")) {
+    cancelarSalaStop();
+  }
+}
+
+document.getElementById("btnCancelarSalaEspera").addEventListener("click", confirmarECancelarSala);
+document.getElementById("btnCancelarSalaResultado").addEventListener("click", confirmarECancelarSala);
 
 /* ========================================================================
    INÍCIO
