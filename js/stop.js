@@ -4,12 +4,13 @@ const JOGO = "stop";
 // "]"), "label" é só o texto mostrado na tela — por isso são separados.
 const CATEGORIAS = [
   { id: "nome", label: "Nome" },
-  { id: "fruta", label: "Fruta" },
+  { id: "comida", label: "Comida" },
   { id: "cor", label: "Cor" },
-  { id: "cidade", label: "Cidade" },
-  { id: "estado", label: "Estado" },
-  { id: "pais", label: "País" },
-  { id: "sogra", label: "Minha sogra é..." },
+  { id: "cep", label: "CEP" },
+  { id: "objeto", label: "Objeto" },
+  { id: "time", label: "Time" },
+  { id: "cantorAtor", label: "Cantor / Ator" },
+  { id: "sogra", label: "Minha Sogra é" },
   { id: "animal", label: "Animal" },
 ];
 
