@@ -41,6 +41,7 @@
       <div class="stop-jogadores-espera" id="esperaJogadores"></div>
       <button class="btn btn-primary" id="btnIniciarRodada">Iniciar rodada</button>
       <button class="btn btn-secondary" id="btnSairSalaEspera">Sair da sala</button>
+      <button class="btn btn-danger" id="btnCancelarSalaEspera" style="display: none">Cancelar sala</button>
       <p id="avisoMinimoJogadores" style="display: none; color: #d32f2f; font-weight: 600; margin-top: 10px">
         Precisa de pelo menos 2 jogadores pra começar.
       </p>
@@ -66,7 +67,7 @@
     <!-- Contestação: revisão das respostas antes de fechar a pontuação -->
     <div id="areaContestacao" style="display: none">
       <div class="stop-topo">
-        <div class="stop-timer" id="contestacaoTimer">0:30</div>
+        <div class="stop-timer" id="contestacaoTimer">1:00</div>
       </div>
       <p>
         Alguém escreveu algo que não vale? Clique em <strong>Contestar</strong>. Se a
@@ -75,6 +76,11 @@
 
       <div class="stop-tabela-wrap">
         <table class="stop-tabela" id="tabelaContestacao"></table>
+      </div>
+
+      <div style="text-align: center; margin-top: 18px">
+        <button type="button" class="btn btn-primary" id="btnProntoContestacao">✅ Terminei de contestar</button>
+        <span class="stop-contagem-votos" id="prontosContestacaoTexto"></span>
       </div>
     </div>
 
@@ -91,6 +97,7 @@
       <div style="margin-top: 20px">
         <button class="btn btn-primary" id="btnNovaRodada">Nova rodada</button>
         <button class="btn btn-secondary" id="btnSairSalaResultado">Sair da sala</button>
+        <button class="btn btn-danger" id="btnCancelarSalaResultado" style="display: none">Cancelar sala</button>
       </div>
     </div>
   </div>

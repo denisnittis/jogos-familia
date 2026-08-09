@@ -17,7 +17,7 @@ const CATEGORIAS = [
 const LETRAS = "ABCDEFGHIJLMNOPQRSTUVXZ";
 
 const DURACAO_MS = 2 * 60 * 1000;
-const CONTESTACAO_MS = 30 * 1000;
+const CONTESTACAO_MS = 60 * 1000;
 
 let salaAtual = null; // { id }
 let terminaEmRodadaAtual = null;
@@ -155,6 +155,8 @@ function renderizarSala(sala) {
       .map((n) => `<span class="stop-jogador-badge">${n}</span>`)
       .join("");
     document.getElementById("avisoMinimoJogadores").style.display = "none";
+    document.getElementById("btnCancelarSalaEspera").style.display =
+      sala.criadoPor === getUser() ? "inline-block" : "none";
     return;
   }
 
@@ -401,6 +403,7 @@ function tentarAbrirContestacao() {
       refSala(JOGO, salaAtual.id).update({
         status: "contestando",
         contestacaoTerminaEm: Date.now() + CONTESTACAO_MS,
+        prontosContestacao: null,
       });
     }
   );
@@ -410,16 +413,62 @@ function iniciarOuAtualizarContestacao(sala) {
   if (sala.contestacaoTerminaEm === contestacaoTerminaEmAtual) {
     // mesma fase: só atualiza a tabela (alguém pode ter contestado algo)
     renderizarTabelaContestacao(sala);
+    atualizarProntosContestacao(sala);
     return;
   }
 
   contestacaoTerminaEmAtual = sala.contestacaoTerminaEm;
   renderizarTabelaContestacao(sala);
+  atualizarProntosContestacao(sala);
 
   pararTimer();
   const faseLocal = sala.contestacaoTerminaEm;
   tickTimerContestacao(faseLocal);
   timerIntervalId = setInterval(() => tickTimerContestacao(faseLocal), 250);
+}
+
+// Cada jogador pode avisar que já terminou de revisar/contestar. Quando
+// todos avisarem, fecha a contestação na hora em vez de esperar o minuto
+// inteiro — o cronômetro continua valendo como limite máximo de qualquer
+// forma (se ninguém clicar, fecha sozinho ao terminar o tempo).
+function atualizarProntosContestacao(sala) {
+  const eu = getUser();
+  const jogadores = Object.keys(sala.jogadores || {});
+  const prontos = Object.keys(sala.prontosContestacao || {});
+  const euEstouPronto = prontos.includes(eu);
+
+  const btn = document.getElementById("btnProntoContestacao");
+  btn.disabled = euEstouPronto;
+  btn.textContent = euEstouPronto ? "✅ Aguardando os outros..." : "✅ Terminei de contestar";
+
+  const texto = document.getElementById("prontosContestacaoTexto");
+  texto.textContent = `${prontos.length}/${jogadores.length} prontos`;
+}
+
+document.getElementById("btnProntoContestacao").addEventListener("click", marcarProntoContestacao);
+
+function marcarProntoContestacao() {
+  if (!salaAtual) return;
+  const eu = getUser();
+  refSala(JOGO, salaAtual.id)
+    .child(`prontosContestacao/${eu}`)
+    .set(true)
+    .then(() => verificarTodosProntosContestacao());
+}
+
+function verificarTodosProntosContestacao() {
+  if (!salaAtual) return;
+  refSala(JOGO, salaAtual.id)
+    .once("value")
+    .then((snap) => {
+      const sala = snap.val();
+      if (!sala || sala.status !== "contestando") return;
+      const jogadores = Object.keys(sala.jogadores || {});
+      const prontos = Object.keys(sala.prontosContestacao || {});
+      if (jogadores.length > 0 && prontos.length >= jogadores.length) {
+        tentarCalcularResultado();
+      }
+    });
 }
 
 function renderizarTabelaContestacao(sala) {
@@ -444,6 +493,9 @@ function renderizarTabelaContestacao(sala) {
 
       if (nome === eu) {
         html += '<span class="stop-sua-resposta">(sua resposta)</span>';
+        if (numVotos > 0) {
+          html += `<span class="stop-contagem-contestacao">⚠️ ${numVotos} ${numVotos === 1 ? "contestação" : "contestações"} contra você</span>`;
+        }
       } else {
         const euContestei = !!votos[eu];
         html += `<button type="button" class="btn-contestar ${euContestei ? "contestada-por-mim" : ""}" data-categoria="${categoria.id}" data-autor="${nome}">${euContestei ? "Contestada ✓" : "Contestar"}</button>`;
@@ -643,6 +695,9 @@ function renderizarResultado(sala) {
   document.getElementById("placarTotal").innerHTML = jogadores
     .map((n) => `<span>${n}: ${pontuacaoTotal[n] || 0}</span>`)
     .join("");
+
+  document.getElementById("btnCancelarSalaResultado").style.display =
+    sala.criadoPor === getUser() ? "inline-block" : "none";
 }
 
 /* ========================================================================
@@ -678,6 +733,26 @@ function sairDaSalaStop() {
 
 document.getElementById("btnSairSalaEspera").addEventListener("click", sairDaSalaStop);
 document.getElementById("btnSairSalaResultado").addEventListener("click", sairDaSalaStop);
+
+// Diferente de sairDaSalaStop (que só tira o jogador da lista e apaga a
+// sala se ele for o último): isso apaga a sala inteira na hora, pra todo
+// mundo — só quem criou a sala vê esse botão.
+function cancelarSalaStop() {
+  if (!salaAtual) return;
+  const salaId = salaAtual.id;
+  refSala(JOGO, salaId).off();
+  pararTimer();
+  refSala(JOGO, salaId).remove();
+
+  salaAtual = null;
+  limparSalaLocal(JOGO);
+  terminaEmRodadaAtual = null;
+  contestacaoTerminaEmAtual = null;
+  mostrarLobby();
+}
+
+document.getElementById("btnCancelarSalaEspera").addEventListener("click", cancelarSalaStop);
+document.getElementById("btnCancelarSalaResultado").addEventListener("click", cancelarSalaStop);
 
 /* ========================================================================
    INÍCIO
