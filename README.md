@@ -98,6 +98,11 @@ js/stop.js              → lógica do stop (categorias, cronômetro, pontuaçã
 sons/milhao/            → sons do show do milhão (sNN.mp3, extraídos da ROM)
 ```
 
+Os arquivos `.js` e `.css` são carregados com `?v=2` no final (ex.:
+`js/forca.js?v=2`). Isso força o celular a baixar a versão nova depois de
+uma atualização, em vez de usar a cópia guardada. Ao mudar algum `.js` ou o
+`style.css`, aumente esse número em todos os `.html` (ex.: `?v=3`).
+
 Para adicionar um novo joguinho depois, crie um novo `.html` seguindo o
 mesmo padrão dos outros (com o bloco de verificação de login no `<head>`) e
 adicione um card novo em `home.html`.
