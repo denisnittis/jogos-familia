@@ -412,6 +412,49 @@ body {
   cursor: default;
 }
 
+.velha-cel.simbolo-x {
+  color: #d32f2f;
+}
+
+.velha-cel.simbolo-o {
+  color: #1e63b5;
+}
+
+.velha-cel.vencedora {
+  background: #ffe066;
+  animation: velha-pulsa 0.6s ease-in-out 3;
+}
+
+@keyframes velha-pulsa {
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+.velha-nivel {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.velha-nivel button {
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 2px solid #d8c3ff;
+  background: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.velha-nivel button.selecionado {
+  background: #a044ff;
+  border-color: #a044ff;
+  color: #fff;
+}
+
 .placar {
   display: flex;
   justify-content: center;
