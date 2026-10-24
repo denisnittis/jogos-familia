@@ -1,12 +1,11 @@
 # Jogos da Família
 
 Site simples com login e alguns joguinhos: Forca, Jogo da Velha, Batalha
-Naval e Stop.
+Naval, Stop e Show do Milhão.
 
-O **Show do Milhão** existe (`milhao.html`) mas está **oculto do menu** —
-não aparece em `home.html`, embora a página continue funcionando se alguém
-acessar `milhao.html` diretamente pela URL. Isso é proposital: vai ser
-tratado separadamente depois.
+O **Show do Milhão** é o do jogo de Mega Drive (Show do Milhão Vol. 2,
+Tectoy 2001): as 991 perguntas e os sons foram extraídos da ROM. É só para
+jogar sozinho, e o recorde fica salvo no próprio aparelho.
 
 Forca, Jogo da Velha e Batalha Naval têm modo **Online (1 x 1)**: uma pessoa
 convida outra (dentre os 9 nomes cadastrados) e jogam em tempo real, cada
@@ -83,7 +82,7 @@ index.html            → tela de login
 home.html              → menu principal (depois de logado)
 forca.html              → jogo da forca (sozinho ou online 1x1)
 velha.html              → jogo da velha (2 jogadores, vs computador ou online 1x1)
-milhao.html             → show do milhão (perguntas e respostas)
+milhao.html             → show do milhão (perguntas, sons e lógica, tudo na página)
 batalha.html            → batalha naval (vs computador ou online 1x1)
 stop.html               → stop / adedonha (sala em grupo, 2+ jogadores)
 css/style.css           → estilos de todas as páginas
@@ -93,9 +92,9 @@ js/firebase-init.js     → inicialização do Firebase e login anônimo
 js/online.js            → funções genéricas de sala usadas por todos os jogos online
 js/forca.js             → lógica do jogo da forca
 js/velha.js             → lógica do jogo da velha
-js/milhao.js            → perguntas e lógica do show do milhão
 js/batalha.js           → lógica da batalha naval
 js/stop.js              → lógica do stop (categorias, cronômetro, pontuação)
+sons/milhao/            → sons do show do milhão (sNN.mp3, extraídos da ROM)
 ```
 
 Para adicionar um novo joguinho depois, crie um novo `.html` seguindo o
