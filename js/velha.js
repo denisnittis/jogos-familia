@@ -15,19 +15,38 @@ let jogadorAtual = "X";
 let modoCpu = false;
 let fimDeJogoLocal = false;
 let placarLocal = { X: 0, O: 0, empate: 0 };
+let quemComecaLocal = "X"; // alterna a cada partida
+let partidaLocalId = 0; // invalida jogadas do computador agendadas para uma partida que já acabou
+let nivelCpu = lerNivelSalvo();
 
 const elBoard = document.getElementById("board");
 const elStatus = document.getElementById("status");
 const btnNovo = document.getElementById("btnNovo");
 
+function lerNivelSalvo() {
+  try {
+    const nivel = localStorage.getItem("velha-nivel");
+    return ["facil", "medio", "impossivel"].includes(nivel) ? nivel : "medio";
+  } catch (e) {
+    return "medio";
+  }
+}
+
 function montarTabuleiro() {
+  const linha = fimDeJogoLocal ? linhaVencedora(tabuleiro) : null;
+  const vezDoCpu = modoCpu && jogadorAtual === "O";
   elBoard.innerHTML = "";
   tabuleiro.forEach((valor, i) => {
     const btn = document.createElement("button");
     btn.className = "velha-cel";
+    if (valor) btn.classList.add(valor === "X" ? "simbolo-x" : "simbolo-o");
+    if (linha && linha.includes(i)) btn.classList.add("vencedora");
     btn.textContent = valor || "";
-    btn.disabled = !!valor || fimDeJogoLocal;
-    btn.addEventListener("click", () => jogarLocal(i));
+    btn.disabled = !!valor || fimDeJogoLocal || vezDoCpu;
+    btn.addEventListener("click", () => {
+      if (modoCpu && jogadorAtual === "O") return; // vez do computador
+      jogarLocal(i);
+    });
     elBoard.appendChild(btn);
   });
 }
@@ -36,7 +55,6 @@ function jogarLocal(indice) {
   if (fimDeJogoLocal || tabuleiro[indice]) return;
 
   tabuleiro[indice] = jogadorAtual;
-  montarTabuleiro();
 
   const vencedor = checarVencedorArray(tabuleiro);
   if (vencedor) {
@@ -47,20 +65,51 @@ function jogarLocal(indice) {
   }
 
   jogadorAtual = jogadorAtual === "X" ? "O" : "X";
+  montarTabuleiro();
   atualizarStatusLocal();
+  agendarCpuSeForAVez();
+}
 
+function agendarCpuSeForAVez() {
   if (modoCpu && jogadorAtual === "O" && !fimDeJogoLocal) {
-    setTimeout(jogadaCpu, 400);
+    const partida = partidaLocalId;
+    setTimeout(() => {
+      if (partida === partidaLocalId) jogadaCpu();
+    }, 450);
   }
 }
 
 function jogadaCpu() {
-  if (fimDeJogoLocal) return;
+  if (fimDeJogoLocal || jogadorAtual !== "O") return;
   const indice = escolherJogadaCpu();
   if (indice !== -1) jogarLocal(indice);
 }
 
+function casasLivres(t) {
+  return t.map((v, i) => (v ? null : i)).filter((i) => i !== null);
+}
+
+function sortear(lista) {
+  return lista[Math.floor(Math.random() * lista.length)];
+}
+
 function escolherJogadaCpu() {
+  if (nivelCpu === "facil") {
+    // Fácil: na maioria das vezes joga em qualquer lugar; às vezes aproveita
+    // uma vitória óbvia.
+    const vitoria = encontrarJogadaDecisiva("O");
+    if (vitoria !== -1 && Math.random() < 0.5) return vitoria;
+    const livres = casasLivres(tabuleiro);
+    return livres.length ? sortear(livres) : -1;
+  }
+  if (nivelCpu === "impossivel") {
+    return melhorJogadaMinimax();
+  }
+  return jogadaMedia();
+}
+
+// Médio: ganha se puder, bloqueia se precisar, senão centro e cantos.
+function jogadaMedia() {
   let jogada = encontrarJogadaDecisiva("O");
   if (jogada !== -1) return jogada;
 
@@ -70,10 +119,47 @@ function escolherJogadaCpu() {
   if (!tabuleiro[4]) return 4;
 
   const cantos = [0, 2, 6, 8].filter((i) => !tabuleiro[i]);
-  if (cantos.length) return cantos[Math.floor(Math.random() * cantos.length)];
+  if (cantos.length) return sortear(cantos);
 
-  const livres = tabuleiro.map((v, i) => (v ? null : i)).filter((i) => i !== null);
-  return livres.length ? livres[Math.floor(Math.random() * livres.length)] : -1;
+  const livres = casasLivres(tabuleiro);
+  return livres.length ? sortear(livres) : -1;
+}
+
+// Impossível: minimax completo (o tabuleiro é pequeno, dá pra olhar tudo).
+// Entre jogadas igualmente boas, sorteia uma, pra não ficar sempre igual.
+function melhorJogadaMinimax() {
+  const t = tabuleiro.slice();
+  let melhorNota = -Infinity;
+  let melhores = [];
+  casasLivres(t).forEach((i) => {
+    t[i] = "O";
+    const nota = minimax(t, "X", 1);
+    t[i] = null;
+    if (nota > melhorNota) {
+      melhorNota = nota;
+      melhores = [i];
+    } else if (nota === melhorNota) {
+      melhores.push(i);
+    }
+  });
+  return melhores.length ? sortear(melhores) : -1;
+}
+
+function minimax(t, vez, profundidade) {
+  const vencedor = checarVencedorArray(t);
+  if (vencedor === "O") return 10 - profundidade;
+  if (vencedor === "X") return profundidade - 10;
+  const livres = casasLivres(t);
+  if (!livres.length) return 0;
+
+  let melhor = vez === "O" ? -Infinity : Infinity;
+  livres.forEach((i) => {
+    t[i] = vez;
+    const nota = minimax(t, vez === "O" ? "X" : "O", profundidade + 1);
+    t[i] = null;
+    melhor = vez === "O" ? Math.max(melhor, nota) : Math.min(melhor, nota);
+  });
+  return melhor;
 }
 
 function encontrarJogadaDecisiva(jogador) {
@@ -88,14 +174,19 @@ function encontrarJogadaDecisiva(jogador) {
   return -1;
 }
 
-function checarVencedorArray(t) {
+function linhaVencedora(t) {
   for (const linha of LINHAS_VENCEDORAS) {
     const [a, b, c] = linha;
     if (t[a] && t[a] === t[b] && t[a] === t[c]) {
-      return t[a];
+      return linha;
     }
   }
   return null;
+}
+
+function checarVencedorArray(t) {
+  const linha = linhaVencedora(t);
+  return linha ? t[linha[0]] : null;
 }
 
 function finalizarLocal(resultado) {
@@ -106,13 +197,20 @@ function finalizarLocal(resultado) {
     elStatus.textContent = "🤝 Empate!";
   } else {
     placarLocal[resultado]++;
-    elStatus.textContent = `🎉 Jogador ${resultado} venceu!`;
+    if (modoCpu) {
+      elStatus.textContent = resultado === "X" ? "🎉 Você venceu!" : "🤖 O computador venceu!";
+    } else {
+      elStatus.textContent = `🎉 Jogador ${resultado} venceu!`;
+    }
   }
   atualizarPlacarLocal();
 }
 
 function atualizarStatusLocal() {
-  if (!fimDeJogoLocal) {
+  if (fimDeJogoLocal) return;
+  if (modoCpu) {
+    elStatus.textContent = jogadorAtual === "X" ? "Sua vez (você é o ❌)" : "Vez do computador...";
+  } else {
     elStatus.textContent = `Vez do jogador ${jogadorAtual}`;
   }
 }
@@ -124,11 +222,14 @@ function atualizarPlacarLocal() {
 }
 
 function novaPartidaLocal() {
+  partidaLocalId++;
   tabuleiro = Array(9).fill(null);
-  jogadorAtual = "X";
+  jogadorAtual = quemComecaLocal;
+  quemComecaLocal = quemComecaLocal === "X" ? "O" : "X";
   fimDeJogoLocal = false;
   montarTabuleiro();
   atualizarStatusLocal();
+  agendarCpuSeForAVez();
 }
 
 function definirModoLocal(cpu) {
@@ -137,8 +238,34 @@ function definirModoLocal(cpu) {
   btnModoCpu.classList.toggle("btn-secondary", !cpu);
   btnModo2p.classList.toggle("btn-primary", !cpu);
   btnModo2p.classList.toggle("btn-secondary", cpu);
+  document.getElementById("nivelCpu").style.display = cpu ? "flex" : "none";
+  document.getElementById("rotuloPlacarX").textContent = cpu ? "Você ❌" : "❌";
+  document.getElementById("rotuloPlacarO").textContent = cpu ? "🤖 ⭕" : "⭕";
+  placarLocal = { X: 0, O: 0, empate: 0 };
+  atualizarPlacarLocal();
+  quemComecaLocal = "X";
   novaPartidaLocal();
 }
+
+function definirNivelCpu(nivel) {
+  nivelCpu = nivel;
+  try {
+    localStorage.setItem("velha-nivel", nivel);
+  } catch (e) {}
+  document.querySelectorAll("#nivelCpu button").forEach((b) => {
+    b.classList.toggle("selecionado", b.dataset.nivel === nivel);
+  });
+  // placar novo para o nível novo
+  placarLocal = { X: 0, O: 0, empate: 0 };
+  atualizarPlacarLocal();
+  quemComecaLocal = "X";
+  novaPartidaLocal();
+}
+
+document.querySelectorAll("#nivelCpu button").forEach((b) => {
+  b.classList.toggle("selecionado", b.dataset.nivel === nivelCpu);
+  b.addEventListener("click", () => definirNivelCpu(b.dataset.nivel));
+});
 
 btnNovo.addEventListener("click", novaPartidaLocal);
 
@@ -264,6 +391,7 @@ document.getElementById("btnConvidar").addEventListener("click", () => {
     jogadores: { X: eu, O: oponente },
     tabuleiro: {},
     vez: "X",
+    comecou: "X",
     vencedor: "",
     placar: { [eu]: 0, [oponente]: 0, empates: 0 },
     status: "aguardando",
@@ -358,11 +486,14 @@ function renderizarBoardOnline(sala, meuSimbolo) {
   const tab = sala.tabuleiro || {};
   const fimDeJogoOnline = !!sala.vencedor;
   const minhaVez = sala.vez === meuSimbolo && !fimDeJogoOnline;
+  const linha = fimDeJogoOnline ? linhaVencedora(tab) : null;
 
   for (let i = 0; i < 9; i++) {
     const valor = tab[i] || "";
     const btn = document.createElement("button");
     btn.className = "velha-cel";
+    if (valor) btn.classList.add(valor === "X" ? "simbolo-x" : "simbolo-o");
+    if (linha && linha.includes(i)) btn.classList.add("vencedora");
     btn.textContent = valor;
     btn.disabled = !!valor || !minhaVez;
     if (!valor && minhaVez) {
@@ -410,7 +541,17 @@ function jogarOnline(indice) {
 
 document.getElementById("btnNovaOnline").addEventListener("click", () => {
   if (!salaAtual) return;
-  refSala(JOGO, salaAtual.id).update({ tabuleiro: {}, vencedor: "", vez: "X" });
+  // Quem começa alterna a cada partida. Usa transaction para que, se os dois
+  // clicarem em "Nova partida" juntos, a troca aconteça uma vez só.
+  refSala(JOGO, salaAtual.id).transaction((sala) => {
+    if (!sala || !sala.vencedor) return sala;
+    const comecou = sala.comecou === "O" ? "X" : "O";
+    sala.tabuleiro = {};
+    sala.vencedor = "";
+    sala.comecou = comecou;
+    sala.vez = comecou;
+    return sala;
+  });
 });
 
 function sairDaSalaClique() {
