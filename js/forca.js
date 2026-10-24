@@ -1,78 +1,64 @@
 const JOGO = "forca";
 
-const PALAVRAS = [
-  "ABACAXI", "CACHORRO", "ELEFANTE", "GIRAFA", "MONTANHA",
-  "FUTEBOL", "PRAIA", "COMPUTADOR", "FAMILIA", "GUITARRA",
-  "CACHOEIRA", "BORBOLETA", "CHOCOLATE", "FOGUETE", "CASTELO",
-  "PIPOCA", "BICICLETA", "ARCOIRIS", "TARTARUGA", "VULCAO",
-  "JACARE", "MOCHILA", "PLANETA", "SORVETE", "DINOSSAURO",
-  "VIOLAO", "HELICOPTERO", "PIRATA", "FLORESTA", "TELEFONE",
+// Partes do boneco, na ordem em que aparecem a cada erro.
+const PARTES_BONECO = [
+  '<circle cx="140" cy="62" r="16" />',
+  '<line x1="140" y1="78" x2="140" y2="128" />',
+  '<line x1="140" y1="92" x2="118" y2="112" />',
+  '<line x1="140" y1="92" x2="162" y2="112" />',
+  '<line x1="140" y1="128" x2="122" y2="158" />',
+  '<line x1="140" y1="128" x2="158" y2="158" />',
 ];
+const ROSTO_TRISTE =
+  '<g class="rosto"><line x1="133" y1="57" x2="137" y2="61" /><line x1="137" y1="57" x2="133" y2="61" />' +
+  '<line x1="143" y1="57" x2="147" y2="61" /><line x1="147" y1="57" x2="143" y2="61" />' +
+  '<path d="M134 70 q6 -5 12 0" /></g>';
 
-const ESTAGIOS = [
-  `
-  +---+
-      |
-      |
-      |
-      |
-=========`,
-  `
-  +---+
-  O   |
-      |
-      |
-      |
-=========`,
-  `
-  +---+
-  O   |
-  |   |
-      |
-      |
-=========`,
-  `
-  +---+
-  O   |
- /|   |
-      |
-      |
-=========`,
-  `
-  +---+
-  O   |
- /|\\  |
-      |
-      |
-=========`,
-  `
-  +---+
-  O   |
- /|\\  |
- /    |
-      |
-=========`,
-  `
-  +---+
-  O   |
- /|\\  |
- / \\  |
-      |
-=========`,
-];
-
-const MAX_ERROS = ESTAGIOS.length - 1;
+const MAX_ERROS = PARTES_BONECO.length;
 const ALFABETO = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const TEMPO_LETRA_MS = 60 * 1000;
+
+// Desenha a forca com "erros" partes do boneco.
+function desenharForca(el, erros) {
+  const n = Math.min(erros, MAX_ERROS);
+  if (el.dataset.erros === String(n)) return; // nada mudou
+  // só a parte nova aparece com animação
+  const anterior = Number(el.dataset.erros || 0);
+  const partes = PARTES_BONECO.slice(0, n).map((parte, i) =>
+    i >= anterior && n > anterior ? '<g class="nova">' + parte + "</g>" : parte
+  );
+  el.dataset.erros = String(n);
+  el.innerHTML =
+    '<svg viewBox="0 0 200 180" role="img" aria-label="Forca com ' + n + ' de ' + MAX_ERROS + ' erros">' +
+    '<g class="forca-poste"><line x1="20" y1="170" x2="110" y2="170" /><line x1="50" y1="170" x2="50" y2="15" />' +
+    '<line x1="48" y1="15" x2="142" y2="15" /><line x1="140" y1="15" x2="140" y2="46" />' +
+    '<line x1="50" y1="45" x2="80" y2="15" /></g>' +
+    '<g class="forca-boneco">' + partes.join("") + (n >= MAX_ERROS ? ROSTO_TRISTE : "") + "</g>" +
+    "</svg>";
+}
+
+// Tira acento e cedilha: "JACARÉ" vira "JACARE", "ONÇA" vira "ONCA".
+function semAcento(texto) {
+  return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
 
 /* ========================================================================
    MODO SOLO
    ======================================================================== */
 
-let palavraAtual = "";
+const CATEGORIAS_FORCA = Object.keys(PALAVRAS_POR_CATEGORIA);
+
+let categoriaEscolhida = lerLocal("forca-categoria", "Todas");
+if (categoriaEscolhida !== "Todas" && !PALAVRAS_POR_CATEGORIA[categoriaEscolhida]) categoriaEscolhida = "Todas";
+let sacola = []; // palavras ainda não sorteadas, pra não repetir logo
+let palavraAtual = ""; // como é escrita, ex.: "JACARÉ"
+let palavraBase = ""; // sem acento, ex.: "JACARE"
+let categoriaAtual = "";
 let letrasCertas = new Set();
 let letrasErradas = new Set();
 let fimDeJogoSolo = false;
+let sequencia = Number(lerLocal("forca-sequencia", "0")) || 0;
+let recorde = Number(lerLocal("forca-recorde", "0")) || 0;
 
 const elFigura = document.getElementById("figura");
 const elPalavra = document.getElementById("palavra");
@@ -80,13 +66,62 @@ const elStatus = document.getElementById("status");
 const elTeclado = document.getElementById("teclado");
 const btnNovo = document.getElementById("btnNovo");
 
+function lerLocal(chave, padrao) {
+  try {
+    const v = localStorage.getItem(chave);
+    return v === null ? padrao : v;
+  } catch (e) {
+    return padrao;
+  }
+}
+
+function salvarLocal(chave, valor) {
+  try {
+    localStorage.setItem(chave, String(valor));
+  } catch (e) {}
+}
+
+function montarCategorias() {
+  const el = document.getElementById("categoriasForca");
+  el.innerHTML = "";
+  ["Todas", ...CATEGORIAS_FORCA].forEach((cat) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = cat;
+    btn.classList.toggle("selecionado", cat === categoriaEscolhida);
+    btn.addEventListener("click", () => {
+      categoriaEscolhida = cat;
+      salvarLocal("forca-categoria", cat);
+      sacola = [];
+      montarCategorias();
+      novaPalavra();
+    });
+    el.appendChild(btn);
+  });
+}
+
+function encherSacola() {
+  const cats = categoriaEscolhida === "Todas" ? CATEGORIAS_FORCA : [categoriaEscolhida];
+  sacola = [];
+  cats.forEach((cat) => PALAVRAS_POR_CATEGORIA[cat].forEach((palavra) => sacola.push({ palavra, cat })));
+  for (let i = sacola.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [sacola[i], sacola[j]] = [sacola[j], sacola[i]];
+  }
+}
+
 function novaPalavra() {
-  palavraAtual = PALAVRAS[Math.floor(Math.random() * PALAVRAS.length)];
+  if (!sacola.length) encherSacola();
+  const sorteada = sacola.pop();
+  palavraAtual = sorteada.palavra;
+  palavraBase = semAcento(palavraAtual);
+  categoriaAtual = sorteada.cat;
   letrasCertas = new Set();
   letrasErradas = new Set();
   fimDeJogoSolo = false;
   elStatus.textContent = "";
   elStatus.className = "status-msg";
+  document.getElementById("categoriaAtual").textContent = "Categoria: " + categoriaAtual;
   montarTecladoSolo();
   renderSolo();
 }
@@ -103,12 +138,12 @@ function montarTecladoSolo() {
 }
 
 function chutarSolo(letra) {
-  if (fimDeJogoSolo) return;
+  if (fimDeJogoSolo || letrasCertas.has(letra) || letrasErradas.has(letra)) return;
 
   const botoes = elTeclado.querySelectorAll(".tecla");
   const botao = Array.from(botoes).find((b) => b.textContent === letra);
 
-  if (palavraAtual.includes(letra)) {
+  if (palavraBase.includes(letra)) {
     letrasCertas.add(letra);
     if (botao) botao.classList.add("certa");
   } else {
@@ -121,20 +156,29 @@ function chutarSolo(letra) {
   renderSolo();
 }
 
+function ehLetra(ch) {
+  return ch >= "A" && ch <= "Z";
+}
+
 function verificarFimSolo() {
-  const ganhou = palavraAtual.split("").every((letra) => letrasCertas.has(letra));
+  const ganhou = palavraBase.split("").every((letra) => !ehLetra(letra) || letrasCertas.has(letra));
 
   if (ganhou) {
     fimDeJogoSolo = true;
-    elStatus.textContent = "🎉 Você ganhou!";
+    sequencia++;
+    if (sequencia > recorde) recorde = sequencia;
+    elStatus.textContent = sequencia > 1 ? `🎉 Acertou! ${sequencia} seguidas!` : "🎉 Você ganhou!";
     elStatus.className = "status-msg win";
     desabilitarTecladoSolo();
   } else if (letrasErradas.size >= MAX_ERROS) {
     fimDeJogoSolo = true;
+    sequencia = 0;
     elStatus.textContent = "💀 Você perdeu! A palavra era " + palavraAtual;
     elStatus.className = "status-msg lose";
     desabilitarTecladoSolo();
   }
+  salvarLocal("forca-sequencia", sequencia);
+  salvarLocal("forca-recorde", recorde);
 }
 
 function desabilitarTecladoSolo() {
@@ -142,14 +186,41 @@ function desabilitarTecladoSolo() {
 }
 
 function renderSolo() {
-  elFigura.textContent = ESTAGIOS[letrasErradas.size];
-  elPalavra.textContent = palavraAtual
+  desenharForca(elFigura, letrasErradas.size);
+  // Mostra a letra com acento assim que a letra sem acento for descoberta;
+  // no fim do jogo mostra a palavra inteira.
+  elPalavra.innerHTML = palavraAtual
     .split("")
-    .map((letra) => (letrasCertas.has(letra) ? letra : "_"))
-    .join(" ");
+    .map((ch, i) => {
+      const base = palavraBase[i];
+      if (!ehLetra(base)) return ch === " " ? '<span class="espaco"></span>' : `<span>${ch}</span>`;
+      if (letrasCertas.has(base)) return `<span>${ch}</span>`;
+      if (fimDeJogoSolo) return `<span class="revelada">${ch}</span>`;
+      return "<span>_</span>";
+    })
+    .join("");
+  document.getElementById("sequenciaForca").textContent =
+    `🔥 Sequência: ${sequencia}   🏆 Recorde: ${recorde}`;
+  btnNovo.textContent = fimDeJogoSolo ? "Próxima palavra" : "Pular palavra";
 }
 
-btnNovo.addEventListener("click", novaPalavra);
+btnNovo.addEventListener("click", () => {
+  // pular uma palavra no meio conta como derrota pra sequência
+  if (!fimDeJogoSolo && (letrasCertas.size || letrasErradas.size)) {
+    sequencia = 0;
+    salvarLocal("forca-sequencia", 0);
+  }
+  novaPalavra();
+});
+
+// Teclado do computador também funciona no modo Sozinho.
+document.addEventListener("keydown", (e) => {
+  if (areaSolo.style.display === "none" || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+  const letra = semAcento(e.key || "").toUpperCase();
+  if (letra.length === 1 && ALFABETO.includes(letra)) chutarSolo(letra);
+  else if (e.key === "Enter" && fimDeJogoSolo) novaPalavra();
+});
 
 /* ========================================================================
    MODO ONLINE (1 x 1)
@@ -363,7 +434,7 @@ function renderizarJogoOnline(sala, rodada, souEscolhedor) {
     iniciarTimerProximaLetra();
   }
 
-  document.getElementById("figuraOnline").textContent = ESTAGIOS[Math.min(numErradas, MAX_ERROS)];
+  desenharForca(document.getElementById("figuraOnline"), numErradas);
   document.getElementById("palavraOnline").textContent = rodada.palavra
     .split("")
     .map((l) => (certas[l] ? l : "_"))
@@ -617,6 +688,7 @@ document.getElementById("btnCancelarConvite").addEventListener("click", sairDaSa
    INÍCIO
    ======================================================================== */
 
+montarCategorias();
 novaPalavra();
 if (lerSalaLocal(JOGO)) {
   definirModoJogo("online");

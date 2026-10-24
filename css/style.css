@@ -212,16 +212,106 @@ body {
 
 /* ---------- Forca ---------- */
 .forca-figure {
-  font-family: monospace;
-  white-space: pre;
-  font-size: 1rem;
   background: #1e1e2f;
-  color: #ffe08a;
-  padding: 14px;
-  border-radius: 10px;
+  padding: 10px;
+  border-radius: 12px;
   display: inline-block;
-  text-align: left;
-  margin-bottom: 18px;
+  margin-bottom: 12px;
+  width: 220px;
+  max-width: 70vw;
+}
+
+.forca-figure svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.forca-poste line {
+  stroke: #c8a26b;
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+
+.forca-boneco circle,
+.forca-boneco line,
+.forca-boneco path {
+  stroke: #ffe08a;
+  stroke-width: 5;
+  stroke-linecap: round;
+  fill: none;
+}
+
+.forca-boneco .nova,
+.forca-boneco .rosto {
+  animation: forca-aparece 0.35s ease-out;
+}
+
+.forca-boneco .rosto line,
+.forca-boneco .rosto path {
+  stroke-width: 2.5;
+}
+
+@keyframes forca-aparece {
+  from {
+    opacity: 0;
+  }
+}
+
+.forca-categorias {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 2px 2px 8px;
+  margin-bottom: 8px;
+  scrollbar-width: thin;
+}
+
+.forca-categorias button {
+  flex: 0 0 auto;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 2px solid #d8c3ff;
+  background: #fff;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.forca-categorias button.selecionado {
+  background: #a044ff;
+  border-color: #a044ff;
+  color: #fff;
+}
+
+.forca-sequencia {
+  font-weight: 700;
+  color: #5b2a86;
+  margin-bottom: 10px;
+  white-space: pre;
+}
+
+.forca-categoria-atual {
+  display: inline-block;
+  background: #fff3c4;
+  color: #8a6d00;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 4px 14px;
+}
+
+.palavra span {
+  display: inline-block;
+  margin: 0 2px;
+}
+
+.palavra .espaco {
+  width: 0.8em;
+}
+
+.palavra .revelada {
+  color: #d32f2f;
 }
 
 .palavra {
@@ -831,10 +921,7 @@ body {
   }
 
   .forca-figure {
-    font-size: 0.85rem;
-    padding: 10px;
-    max-width: 100%;
-    overflow-x: auto;
+    width: 180px;
   }
 
   .palavra {
