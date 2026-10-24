@@ -3,9 +3,10 @@
 Site simples com login e alguns joguinhos: Forca, Jogo da Velha, Batalha
 Naval, Stop e Show do Milhão.
 
-O **Show do Milhão** é o do jogo de Mega Drive (Show do Milhão Vol. 2,
-Tectoy 2001): as 991 perguntas e os sons foram extraídos da ROM. É só para
-jogar sozinho, e o recorde fica salvo no próprio aparelho.
+O **Show do Milhão** é o do jogo de Mega Drive (Show do Milhão Vol. 1 e 2,
+Tectoy 2001): as 1.989 perguntas dos dois volumes (sem repetições) e os sons
+do Vol. 2 foram extraídos das ROMs. É só para jogar sozinho, e o recorde
+fica salvo no próprio aparelho.
 
 Forca, Jogo da Velha e Batalha Naval têm modo **Online (1 x 1)**: uma pessoa
 convida outra (dentre os 9 nomes cadastrados) e jogam em tempo real, cada
