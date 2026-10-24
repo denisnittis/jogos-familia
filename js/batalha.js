@@ -37,7 +37,7 @@ function gerarFrotaAleatoria() {
       const c = Math.floor(Math.random() * TAM_TABULEIRO);
       const celulas = calcularCelulasNavio(r, c, navio.tamanho, orientacao);
       if (celulas && celulas.every((cel) => !mapa[cel])) {
-        celulas.forEach((cel) => (mapa[cel] = true));
+        celulas.forEach((cel) => (mapa[cel] = navio.id));
         colocado = true;
       }
     }
@@ -45,13 +45,22 @@ function gerarFrotaAleatoria() {
   return mapa;
 }
 
-// Agrupa as células de "navios" em componentes conexos e retorna o conjunto
-// de células cujo componente está 100% coberto por acertos em "tiros".
-function calcularCelulasAfundadas(navios, tiros) {
+// Cada célula de "navios" guarda o id do navio que está nela (ex.:
+// "cruzador"), assim dois navios encostados continuam sendo navios
+// diferentes. Salas online antigas guardavam só "true" em cada célula; para
+// essas, os navios são reconstruídos como grupos de células vizinhas.
+function agruparNavios(navios) {
+  const grupos = {};
   const visitado = new Set();
-  const afundadas = new Set();
+  let anonimos = 0;
 
   Object.keys(navios).forEach((inicio) => {
+    const valor = navios[inicio];
+    if (typeof valor === "string") {
+      if (!grupos[valor]) grupos[valor] = [];
+      grupos[valor].push(inicio);
+      return;
+    }
     if (visitado.has(inicio)) return;
     const componente = [];
     const fila = [inicio];
@@ -61,18 +70,70 @@ function calcularCelulasAfundadas(navios, tiros) {
       componente.push(atual);
       const [r, c] = atual.split("_").map(Number);
       [`${r - 1}_${c}`, `${r + 1}_${c}`, `${r}_${c - 1}`, `${r}_${c + 1}`].forEach((viz) => {
-        if (navios[viz] && !visitado.has(viz)) {
+        if (navios[viz] === true && !visitado.has(viz)) {
           visitado.add(viz);
           fila.push(viz);
         }
       });
     }
-    if (componente.every((cel) => tiros[cel] === "acerto")) {
-      componente.forEach((cel) => afundadas.add(cel));
-    }
+    grupos[`_${anonimos++}`] = componente;
   });
 
+  return grupos;
+}
+
+// Ids dos navios que já têm todas as células atingidas.
+function idsNaviosAfundados(navios, tiros) {
+  const grupos = agruparNavios(navios);
+  return Object.keys(grupos).filter((id) => grupos[id].every((cel) => tiros[cel] === "acerto"));
+}
+
+function calcularCelulasAfundadas(navios, tiros) {
+  const grupos = agruparNavios(navios);
+  const afundadas = new Set();
+  idsNaviosAfundados(navios, tiros).forEach((id) => grupos[id].forEach((cel) => afundadas.add(cel)));
   return afundadas;
+}
+
+function nomeNavio(id) {
+  const navio = FROTA.find((n) => n.id === id);
+  return navio ? navio.nome : "navio";
+}
+
+// Texto curto sobre o último tiro: "Água!", "Acertou!" ou "Afundou o X!".
+// "afundou" é o id do navio que esse tiro afundou (ou "" / null).
+function descreverTiro(quem, resultado, afundou) {
+  if (afundou) {
+    const artigo = quem === "Você" ? "Você afundou" : `${quem} afundou`;
+    return `🔥 ${artigo} o ${nomeNavio(afundou)}!`;
+  }
+  if (resultado === "acerto") return `💥 ${quem === "Você" ? "Você acertou" : quem + " acertou"} um navio!`;
+  return `🌊 ${quem === "Você" ? "Você errou" : quem + " errou"}: água!`;
+}
+
+// Mostra a frota com os navios afundados riscados. Em salas antigas (sem
+// ids) não dá pra saber o nome de cada navio, então a lista fica escondida.
+function renderizarStatusFrota(elId, navios, tiros) {
+  const el = document.getElementById(elId);
+  const temIds = Object.values(navios).some((v) => typeof v === "string");
+  if (!temIds) {
+    el.innerHTML = "";
+    return;
+  }
+  const afundados = new Set(idsNaviosAfundados(navios, tiros));
+  const restantes = FROTA.filter((n) => !afundados.has(n.id)).length;
+  el.innerHTML =
+    `<span class="naval-frota-restam">${restantes} de ${FROTA.length} navios na água</span>` +
+    FROTA.map(
+      (n) =>
+        `<span class="naval-frota-item${afundados.has(n.id) ? " afundado" : ""}">${n.nome} (${n.tamanho})</span>`
+    ).join("");
+}
+
+function mostrarAvisoTiro(texto) {
+  const el = document.getElementById("avisoTiro");
+  el.textContent = texto || "";
+  el.style.display = texto ? "block" : "none";
 }
 
 function renderizarTabuleiroProprio(elId, navios, tirosRecebidos) {
@@ -186,7 +247,7 @@ function clicarPosicionamento(r, c) {
     return;
   }
 
-  celulas.forEach((cel) => (meusNavios[cel] = true));
+  celulas.forEach((cel) => (meusNavios[cel] = navio.id));
   naviosColocados[navio.id] = celulas;
   renderizarTabuleiroPosicionamento();
   selecionarProximoNavioDisponivel();
@@ -210,7 +271,7 @@ document.getElementById("btnAleatorio").addEventListener("click", () => {
       const c = Math.floor(Math.random() * TAM_TABULEIRO);
       const celulas = calcularCelulasNavio(r, c, navio.tamanho, orientacao);
       if (celulas && celulas.every((cel) => !meusNavios[cel])) {
-        celulas.forEach((cel) => (meusNavios[cel] = true));
+        celulas.forEach((cel) => (meusNavios[cel] = navio.id));
         naviosColocados[navio.id] = celulas;
         colocado = true;
       }
@@ -262,6 +323,7 @@ function iniciarBatalhaCpu() {
   document.getElementById("onlineInfoBatalha").style.display = "none";
   document.getElementById("btnSairSalaBatalha").style.display = "none";
   document.getElementById("btnBatalhaNova").style.display = "none";
+  mostrarAvisoTiro("");
 
   renderizarBatalhaCpu();
 }
@@ -270,6 +332,8 @@ function renderizarBatalhaCpu() {
   renderizarTabuleiroProprio("gridMeu", meusNavios, tirosDoCpu);
   const podeAtirar = turnoCpu === "voce" && faseCpu !== "finalizado";
   renderizarTabuleiroInimigo("gridInimigo", naviosCpu, meusTirosCpu, podeAtirar, atirarCpu);
+  renderizarStatusFrota("frotaStatusMeu", meusNavios, tirosDoCpu);
+  renderizarStatusFrota("frotaStatusInimigo", naviosCpu, meusTirosCpu);
 
   if (faseCpu !== "finalizado") {
     const elStatus = document.getElementById("statusBatalha");
@@ -284,7 +348,10 @@ function atirarCpu(r, c) {
   const key = `${r}_${c}`;
   if (meusTirosCpu[key]) return;
 
+  const antes = idsNaviosAfundados(naviosCpu, meusTirosCpu);
   meusTirosCpu[key] = naviosCpu[key] ? "acerto" : "agua";
+  const afundou = idsNaviosAfundados(naviosCpu, meusTirosCpu).find((id) => !antes.includes(id));
+  mostrarAvisoTiro(descreverTiro("Você", meusTirosCpu[key], afundou));
 
   const totalCpu = Object.keys(naviosCpu).length;
   const acertosCpu = Object.values(meusTirosCpu).filter((v) => v === "acerto").length;
@@ -299,7 +366,10 @@ function atirarCpu(r, c) {
 
 function jogadaCpuBatalha() {
   const key = escolherTiroCpu();
+  const antes = idsNaviosAfundados(meusNavios, tirosDoCpu);
   tirosDoCpu[key] = meusNavios[key] ? "acerto" : "agua";
+  const afundou = idsNaviosAfundados(meusNavios, tirosDoCpu).find((id) => !antes.includes(id));
+  mostrarAvisoTiro(descreverTiro("O computador", tirosDoCpu[key], afundou));
 
   const totalMeu = Object.keys(meusNavios).length;
   const acertosMeu = Object.values(tirosDoCpu).filter((v) => v === "acerto").length;
@@ -313,19 +383,40 @@ function jogadaCpuBatalha() {
 
 function escolherTiroCpu() {
   const afundadas = calcularCelulasAfundadas(meusNavios, tirosDoCpu);
-  const alvos = [];
-  Object.keys(tirosDoCpu).forEach((key) => {
-    if (tirosDoCpu[key] !== "acerto" || afundadas.has(key)) return;
+  const dentro = (r, c) => r >= 0 && r < TAM_TABULEIRO && c >= 0 && c < TAM_TABULEIRO;
+  const livre = (r, c) => dentro(r, c) && !tirosDoCpu[`${r}_${c}`];
+  const acertosAbertos = Object.keys(tirosDoCpu).filter(
+    (key) => tirosDoCpu[key] === "acerto" && !afundadas.has(key)
+  );
+  const temAcerto = (r, c) => acertosAbertos.includes(`${r}_${c}`);
+
+  // 1) Dois acertos vizinhos formam uma linha: continua nas pontas dela.
+  const naLinha = [];
+  acertosAbertos.forEach((key) => {
     const [r, c] = key.split("_").map(Number);
-    [[r - 1, c], [r + 1, c], [r, c - 1], [r, c + 1]].forEach(([rr, cc]) => {
-      const k2 = `${rr}_${cc}`;
-      if (rr >= 0 && rr < TAM_TABULEIRO && cc >= 0 && cc < TAM_TABULEIRO && !tirosDoCpu[k2] && !alvos.includes(k2)) {
-        alvos.push(k2);
-      }
+    [[0, 1], [1, 0]].forEach(([dr, dc]) => {
+      if (!temAcerto(r + dr, c + dc)) return;
+      let r1 = r, c1 = c;
+      while (temAcerto(r1 - dr, c1 - dc)) { r1 -= dr; c1 -= dc; }
+      let r2 = r + dr, c2 = c + dc;
+      while (temAcerto(r2 + dr, c2 + dc)) { r2 += dr; c2 += dc; }
+      if (livre(r1 - dr, c1 - dc)) naLinha.push(`${r1 - dr}_${c1 - dc}`);
+      if (livre(r2 + dr, c2 + dc)) naLinha.push(`${r2 + dr}_${c2 + dc}`);
     });
   });
-  if (alvos.length) return alvos[Math.floor(Math.random() * alvos.length)];
+  if (naLinha.length) return naLinha[Math.floor(Math.random() * naLinha.length)];
 
+  // 2) Um acerto solto: tenta os vizinhos.
+  const vizinhos = [];
+  acertosAbertos.forEach((key) => {
+    const [r, c] = key.split("_").map(Number);
+    [[r - 1, c], [r + 1, c], [r, c - 1], [r, c + 1]].forEach(([rr, cc]) => {
+      if (livre(rr, cc)) vizinhos.push(`${rr}_${cc}`);
+    });
+  });
+  if (vizinhos.length) return vizinhos[Math.floor(Math.random() * vizinhos.length)];
+
+  // 3) Nada em vista: tiro aleatório.
   let key;
   do {
     key = `${Math.floor(Math.random() * TAM_TABULEIRO)}_${Math.floor(Math.random() * TAM_TABULEIRO)}`;
@@ -601,6 +692,16 @@ function renderizarSalaBatalha(sala) {
   renderizarTabuleiroProprio("gridMeu", meusNaviosSala, tirosInimigoSala);
   const podeAtirar = sala.vez === papelAtual && !sala.vencedor;
   renderizarTabuleiroInimigo("gridInimigo", naviosInimigoSala, meusTirosSala, podeAtirar, atirarOnline);
+  renderizarStatusFrota("frotaStatusMeu", meusNaviosSala, tirosInimigoSala);
+  renderizarStatusFrota("frotaStatusInimigo", naviosInimigoSala, meusTirosSala);
+
+  const ultimo = sala.ultimoTiro;
+  if (ultimo && ultimo.papel) {
+    const quem = ultimo.papel === papelAtual ? "Você" : sala.jogadores[ultimo.papel];
+    mostrarAvisoTiro(descreverTiro(quem, ultimo.resultado, ultimo.afundou));
+  } else {
+    mostrarAvisoTiro("");
+  }
 }
 
 function ficarProntoOnline() {
@@ -628,13 +729,18 @@ function atirarOnline(r, c) {
 
     const papelInimigo = meuPapel === "A" ? "B" : "A";
     const naviosInimigo = (sala.navios && sala.navios[papelInimigo]) || {};
+    const antes = idsNaviosAfundados(naviosInimigo, tiros);
     tiros[key] = naviosInimigo[key] ? "acerto" : "agua";
+    const afundou = idsNaviosAfundados(naviosInimigo, tiros).find((id) => !antes.includes(id));
 
     const totalNavios = Object.keys(naviosInimigo).length;
     const totalAcertos = Object.values(tiros).filter((v) => v === "acerto").length;
     const venceu = totalNavios > 0 && totalAcertos >= totalNavios;
 
-    const atualizacoes = { [`tiros/${meuPapel}`]: tiros };
+    const atualizacoes = {
+      [`tiros/${meuPapel}`]: tiros,
+      ultimoTiro: { papel: meuPapel, resultado: tiros[key], afundou: afundou && !afundou.startsWith("_") ? afundou : "" },
+    };
     if (venceu) {
       atualizacoes.vencedor = meuPapel;
       atualizacoes.fase = "finalizado";
@@ -667,6 +773,7 @@ document.getElementById("btnBatalhaNova").addEventListener("click", () => {
     navios: {},
     prontos: { A: false, B: false },
     tiros: {},
+    ultimoTiro: null,
     vencedor: "",
     vez: "A",
   });
