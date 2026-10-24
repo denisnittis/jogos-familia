@@ -71,6 +71,12 @@ button:disabled{cursor:default}
 .help svg{width:26px;height:26px;stroke:var(--gold);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .help:disabled{opacity:.3}
 .help .c{font-size:11px;color:var(--muted)}
+.timer{display:flex;align-items:center;gap:12px}
+.timer .track{flex:1;height:8px;background:rgba(255,255,255,.1);border-radius:999px;overflow:hidden}
+.timer .track i{display:block;height:100%;width:100%;background:var(--gold);transition:width .2s linear}
+.timer b{font-size:24px;font-variant-numeric:tabular-nums;color:var(--gold);min-width:2.6em;text-align:right}
+.timer.low b{color:var(--wrong)}
+.timer.low .track i{background:var(--wrong)}
 .stop{background:transparent;border:2px solid var(--muted);color:var(--ink);border-radius:999px;padding:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
 .stop:disabled{opacity:.3}
 /* sheets */
@@ -107,6 +113,7 @@ button:disabled{cursor:default}
     <h1 class="logo">Show do Milhão<small>VOLUME 2 · 991 PERGUNTAS</small></h1>
     <div class="rules">
       <p><b>16 perguntas</b> até R$ 1 milhão. Errou, leva metade do que tinha. Na pergunta do milhão, errar zera tudo.</p>
+      <p><b>1 minuto</b> para cada pergunta. Se o tempo acabar, conta como erro.</p>
       <p><b>Ajudas:</b> pular (3 vezes), cartas, universitários e placas. Não valem na pergunta do milhão.</p>
     </div>
     <button class="btn-gold" id="play">Jogar</button>
@@ -122,6 +129,7 @@ button:disabled{cursor:default}
       <div class="acertar"><span>Acertar</span><b id="mAcertar"></b></div>
     </div>
     <div class="qhead"><span id="qnum"></span><span class="links"><button id="mute">Som</button><button id="showLadder">Prêmios</button></span></div>
+    <div class="timer" id="timer" role="timer" aria-label="Tempo restante"><div class="track"><i id="tBar"></i></div><b id="tSec">1:00</b></div>
     <div class="question" id="qtext"></div>
     <div class="answers" id="answers"></div>
     <div class="helps">
@@ -146,6 +154,8 @@ const rnd=n=>Math.floor(Math.random()*n);
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
 
 let S=null; // game state, serializable
+const TEMPO_S=60; // seconds to answer each question
+let tick=null;
 
 // Sounds extracted from the Mega Drive ROM (sons/milhao/sNN.mp3, numbered as in the game's sound table)
 const SND={tap:2,blip:0,intro:7,music:18,confirm:9,right:11,wrong:12,cartas:15,placas:14,uni:13,end:4,milhao:35,milhaoMusic:17};
@@ -205,6 +215,23 @@ function newGame(){
 }
 function nextQuestion(i){
   S.i=i;S.key=draw(LEVEL(i));S.asked.push(S.key);S.removed=[];S.hints=null;S.locked=false;
+  startTimer();
+}
+function startTimer(){S.deadline=Date.now()+TEMPO_S*1000;clearInterval(tick);tick=setInterval(updateTimer,200);updateTimer()}
+function stopTimer(){clearInterval(tick);tick=null}
+function updateTimer(){
+  if(!S)return stopTimer();
+  const left=Math.max(0,S.deadline-Date.now()),sec=Math.ceil(left/1000);
+  $('tSec').textContent=Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');
+  $('tBar').style.width=left/(TEMPO_S*10)+'%';
+  $('timer').classList.toggle('low',sec<=10);
+  if(!left&&!S.locked)timeUp();
+}
+function timeUp(){
+  stopTimer();S.locked=true;seq++;stopAll();closeSheet();render();
+  const c=cur(),m=money();
+  $('ans'+c.c).classList.add('right');
+  play(SND.wrong,{fallback:1400}).then(()=>end('tempo',m.errar,c.a[c.c]));
 }
 function money(){
   const i=S.i,acc=i?PRIZES[i-1]:0;
@@ -245,7 +272,8 @@ function confirmAnswer(k){
   });
 }
 function answer(k){
-  S.locked=true;seq++;stopAll();render();
+  if(S.locked)return;
+  stopTimer();S.locked=true;seq++;stopAll();render();
   const c=cur(),m=money();
   $('ans'+k).classList.add('picked');
   setTimeout(async()=>{
@@ -259,9 +287,9 @@ function answer(k){
 }
 function end(kind,prize,rightText){
   const best=store('smv2-best')||0;if(prize>best)store('smv2-best',prize);
-  const title={errou:'Que pena!',parou:'Parou!',milhao:'Você ganhou 1 milhão!'}[kind];
-  const sub=kind==='errou'?'A resposta certa era: ':kind==='parou'?`Parou na pergunta ${S.i+1}.`:'Acertou todas as 16 perguntas.';
-  S=null;seq++;stopAll();
+  const title={errou:'Que pena!',tempo:'Acabou o tempo!',parou:'Parou!',milhao:'Você ganhou 1 milhão!'}[kind];
+  const sub=kind==='errou'||kind==='tempo'?'A resposta certa era: ':kind==='parou'?`Parou na pergunta ${S.i+1}.`:'Acertou todas as 16 perguntas.';
+  S=null;seq++;stopAll();stopTimer();
   if(kind==='milhao')play(SND.milhao).then(()=>play(SND.milhaoMusic));else play(SND.end);
   sheet(`<h2>${title}</h2><p></p><div class="result-prize">${fmt(prize)}</div>
     <div class="row"><button class="btn-ghost" id="menu">Início</button><button class="btn-ghost yes" id="again">Jogar de novo</button></div>`,el=>{
@@ -302,7 +330,7 @@ $('hCartas').onclick=()=>{
       const n=deck[b.dataset.i][1],c=cur();
       S.removed=shuffle([0,1,2,3].filter(k=>k!==c.c)).slice(0,n);
       el.querySelector('p').textContent=n?`Saíram ${n} resposta${n>1?'s':''} errada${n>1?'s':''}.`:'Que azar, deu Rei. Nenhuma resposta saiu.';
-      setTimeout(()=>{closeSheet();render();stopAll();play(SND.music,{vol:.45})},1600);
+      setTimeout(()=>{if(!S||S.locked)return;closeSheet();render();stopAll();play(SND.music,{vol:.45})},1600);
     });
   });
 };
