@@ -11,6 +11,117 @@ const FROTA = [
 const TAM_TABULEIRO = 10;
 
 /* ========================================================================
+   SONS (gerados na hora com Web Audio, sem arquivos de áudio)
+   ======================================================================== */
+
+let audioCtx = null;
+let somLigado = lerSomLigado();
+
+function lerSomLigado() {
+  try {
+    return localStorage.getItem("batalha-som") !== "0";
+  } catch (e) {
+    return true;
+  }
+}
+
+// O celular só libera o áudio depois de um toque na tela, então o
+// AudioContext é criado (ou destravado) no primeiro toque.
+function prepararAudio() {
+  if (!audioCtx) {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return null;
+    audioCtx = new Ctx();
+  }
+  if (audioCtx.state === "suspended") audioCtx.resume();
+  return audioCtx;
+}
+
+document.addEventListener("pointerdown", prepararAudio);
+
+// Ruído branco que passa por um filtro: é a base do "splash" e da explosão.
+function tocarRuido(ctx, inicio, duracao, filtro, freqDe, freqPara, volume) {
+  const tamanho = Math.ceil(ctx.sampleRate * duracao);
+  const buffer = ctx.createBuffer(1, tamanho, ctx.sampleRate);
+  const dados = buffer.getChannelData(0);
+  for (let i = 0; i < tamanho; i++) dados[i] = Math.random() * 2 - 1;
+
+  const fonte = ctx.createBufferSource();
+  fonte.buffer = buffer;
+  const f = ctx.createBiquadFilter();
+  f.type = filtro;
+  f.frequency.setValueAtTime(freqDe, inicio);
+  f.frequency.exponentialRampToValueAtTime(freqPara, inicio + duracao);
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(0.0001, inicio);
+  g.gain.exponentialRampToValueAtTime(volume, inicio + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, inicio + duracao);
+  fonte.connect(f).connect(g).connect(ctx.destination);
+  fonte.start(inicio);
+  fonte.stop(inicio + duracao);
+}
+
+// Tom que desce de frequência: o "bum" grave e o navio afundando.
+function tocarTom(ctx, inicio, duracao, tipo, freqDe, freqPara, volume) {
+  const osc = ctx.createOscillator();
+  osc.type = tipo;
+  osc.frequency.setValueAtTime(freqDe, inicio);
+  osc.frequency.exponentialRampToValueAtTime(freqPara, inicio + duracao);
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(0.0001, inicio);
+  g.gain.exponentialRampToValueAtTime(volume, inicio + 0.015);
+  g.gain.exponentialRampToValueAtTime(0.0001, inicio + duracao);
+  osc.connect(g).connect(ctx.destination);
+  osc.start(inicio);
+  osc.stop(inicio + duracao);
+}
+
+// tipo: "agua", "acerto" ou "afundou"
+function tocarSom(tipo) {
+  if (!somLigado) return;
+  const ctx = prepararAudio();
+  if (!ctx) return;
+  const t = ctx.currentTime + 0.01;
+
+  if (tipo === "agua") {
+    // tchibum: ruído agudo que vai ficando abafado, mais umas gotinhas
+    tocarRuido(ctx, t, 0.6, "lowpass", 3500, 300, 0.5);
+    tocarTom(ctx, t + 0.05, 0.12, "sine", 900, 400, 0.15);
+    tocarTom(ctx, t + 0.18, 0.1, "sine", 1100, 500, 0.08);
+  } else if (tipo === "acerto") {
+    // explosão: estalo + estrondo grave
+    tocarRuido(ctx, t, 0.5, "lowpass", 2500, 120, 0.9);
+    tocarTom(ctx, t, 0.45, "sine", 140, 40, 0.9);
+  } else if (tipo === "afundou") {
+    // explosão maior e o navio indo pro fundo
+    tocarRuido(ctx, t, 0.9, "lowpass", 3000, 80, 1);
+    tocarTom(ctx, t, 0.7, "sine", 160, 35, 1);
+    tocarTom(ctx, t + 0.5, 1.3, "triangle", 420, 60, 0.25);
+    tocarRuido(ctx, t + 0.6, 1.2, "bandpass", 900, 200, 0.25);
+  }
+}
+
+function somDoTiro(resultado, afundou) {
+  tocarSom(afundou ? "afundou" : resultado === "acerto" ? "acerto" : "agua");
+}
+
+function atualizarBotaoSom() {
+  const btn = document.getElementById("btnSom");
+  btn.textContent = somLigado ? "🔊" : "🔇";
+  btn.title = somLigado ? "Desligar som" : "Ligar som";
+}
+
+document.getElementById("btnSom").addEventListener("click", () => {
+  somLigado = !somLigado;
+  try {
+    localStorage.setItem("batalha-som", somLigado ? "1" : "0");
+  } catch (e) {}
+  atualizarBotaoSom();
+  if (somLigado) tocarSom("agua");
+});
+atualizarBotaoSom();
+
+/* ========================================================================
    HELPERS GERAIS (usados tanto no modo CPU quanto Online)
    ======================================================================== */
 
@@ -352,6 +463,7 @@ function atirarCpu(r, c) {
   meusTirosCpu[key] = naviosCpu[key] ? "acerto" : "agua";
   const afundou = idsNaviosAfundados(naviosCpu, meusTirosCpu).find((id) => !antes.includes(id));
   mostrarAvisoTiro(descreverTiro("Você", meusTirosCpu[key], afundou));
+  somDoTiro(meusTirosCpu[key], afundou);
 
   const totalCpu = Object.keys(naviosCpu).length;
   const acertosCpu = Object.values(meusTirosCpu).filter((v) => v === "acerto").length;
@@ -370,6 +482,7 @@ function jogadaCpuBatalha() {
   tirosDoCpu[key] = meusNavios[key] ? "acerto" : "agua";
   const afundou = idsNaviosAfundados(meusNavios, tirosDoCpu).find((id) => !antes.includes(id));
   mostrarAvisoTiro(descreverTiro("O computador", tirosDoCpu[key], afundou));
+  somDoTiro(tirosDoCpu[key], afundou);
 
   const totalMeu = Object.keys(meusNavios).length;
   const acertosMeu = Object.values(tirosDoCpu).filter((v) => v === "acerto").length;
@@ -453,6 +566,7 @@ const areaBatalha = document.getElementById("areaBatalha");
 let modoBatalha = "cpu";
 let salaAtual = null;
 let papelAtual = null; // "A" ou "B" na sala online atual
+let ultimoTiroComSom = null; // último tiro online que já tocou som
 
 function irParaModoCpuBatalha() {
   if (modoBatalha === "online") {
@@ -699,8 +813,15 @@ function renderizarSalaBatalha(sala) {
   if (ultimo && ultimo.papel) {
     const quem = ultimo.papel === papelAtual ? "Você" : sala.jogadores[ultimo.papel];
     mostrarAvisoTiro(descreverTiro(quem, ultimo.resultado, ultimo.afundou));
+    // Toca o som só quando chega um tiro novo (não ao abrir a página).
+    const idTiro = `${salaAtual.id}:${ultimo.n || 0}`;
+    if (ultimoTiroComSom !== null && idTiro !== ultimoTiroComSom) {
+      somDoTiro(ultimo.resultado, ultimo.afundou || ultimo.afundouAlgum);
+    }
+    ultimoTiroComSom = idTiro;
   } else {
     mostrarAvisoTiro("");
+    if (salaAtual) ultimoTiroComSom = `${salaAtual.id}:0`; // partida nova: o 1º tiro já toca
   }
 }
 
@@ -739,7 +860,13 @@ function atirarOnline(r, c) {
 
     const atualizacoes = {
       [`tiros/${meuPapel}`]: tiros,
-      ultimoTiro: { papel: meuPapel, resultado: tiros[key], afundou: afundou && !afundou.startsWith("_") ? afundou : "" },
+      ultimoTiro: {
+        papel: meuPapel,
+        resultado: tiros[key],
+        afundou: afundou && !afundou.startsWith("_") ? afundou : "",
+        afundouAlgum: !!afundou,
+        n: ((sala.ultimoTiro && sala.ultimoTiro.n) || 0) + 1,
+      },
     };
     if (venceu) {
       atualizacoes.vencedor = meuPapel;
