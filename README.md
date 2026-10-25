@@ -5,8 +5,9 @@ Naval, Stop, Show do Milhão e Megamania.
 
 O **Show do Milhão** é o do jogo de Mega Drive (Show do Milhão Vol. 1 e 2,
 Tectoy 2001): as 1.989 perguntas dos dois volumes (sem repetições) e os sons
-do Vol. 2 foram extraídos das ROMs. É só para jogar sozinho, e o recorde
-fica salvo no próprio aparelho.
+do Vol. 2 foram extraídos das ROMs. Tem ainda o tema extra **Corinthians**,
+com 150 perguntas novas, que só aparecem quando esse tema é escolhido. É só
+para jogar sozinho, e o recorde fica salvo no próprio aparelho.
 
 O **Megamania** é o cartucho original do Atari 2600 (Activision, 1982)
 rodando no emulador [Javatari](https://github.com/ppeccin/javatari.js)
