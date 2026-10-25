@@ -43,6 +43,34 @@
 </div>
 
 <script src="js/auth.js?v=2"></script>
+<script>
+  // Sem v-synch, o relógio do Javatari usa setInterval com o tempo de um quadro do Atari (≈16,1 ms no
+  // Megamania, que gera ~62 quadros/s como no console de verdade), mas o navegador arredonda para ms inteiros.
+  // Aqui esse intervalo vira um relógio preciso guiado pelo requestAnimationFrame, que roda o número certo
+  // de quadros pelo tempo passado, seja a tela de 60, 90 ou 120 Hz.
+  (function () {
+    var setIntervalOriginal = window.setInterval, clearIntervalOriginal = window.clearInterval;
+    var relogios = {}, proximoId = 1e6;
+    window.setInterval = function (fn, ms) {
+      if (typeof fn !== "function" || !(ms > 14 && ms < 21)) return setIntervalOriginal.apply(window, arguments);
+      var id = proximoId++, ultimo = performance.now(), sobra = 0;
+      relogios[id] = true;
+      (function passo(agora) {
+        if (!relogios[id]) return;
+        sobra += (agora || performance.now()) - ultimo;
+        ultimo = agora || performance.now();
+        if (sobra > ms * 4) sobra = ms * 4; // depois de uma pausa (aba escondida), não acelera para alcançar
+        while (sobra >= ms) { sobra -= ms; fn(); }
+        requestAnimationFrame(passo);
+      })();
+      return id;
+    };
+    window.clearInterval = function (id) {
+      if (relogios[id]) delete relogios[id];
+      else clearIntervalOriginal.apply(window, arguments);
+    };
+  })();
+</script>
 <script src="js/javatari/javatari.js?v=2"></script>
 <script>
   // Javatari (AGPL v3, js/javatari/license.txt): roda sempre o cartucho do Megamania
@@ -51,6 +79,9 @@
   Javatari.CARTRIDGE_SHOW_RECENT = false;
   Javatari.ALLOW_URL_PARAMETERS = false;
   Javatari.AUTO_POWER_ON_DELAY = 300;
+  // Sem v-synch: o emulador marca o tempo sozinho. Com v-synch ele segue a taxa da tela medida ao abrir
+  // a página, e celulares de 90/120 Hz que mudam a taxa depois rodam o jogo rápido demais
+  Javatari.SCREEN_VSYNCH_MODE = -1;
   document.getElementById("btnSair").addEventListener("click", logout);
 
   // Aperta e solta o Game Reset do console, que é o que começa a partida no Megamania
