@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Megamania - Jogos da Família</title>
+<link rel="stylesheet" href="css/style.css?v=2" />
+<script>
+  if (!localStorage.getItem("ff_user")) {
+    window.location.href = "index.html";
+  }
+</script>
+<style>
+  #javatari { text-align: center; margin: 0 auto; }
+  #javatari-screen { margin: 0 auto; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); }
+  .mm-dicas { background: #ffffffee; border-radius: 14px; padding: 12px 16px; margin-top: 18px; color: #333; font-size: 0.95rem; line-height: 1.45; }
+  .mm-dicas b { color: #5b2a86; }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+  <div class="top-bar">
+    <h2>👾 Megamania</h2>
+    <div class="actions">
+      <a class="btn btn-secondary" href="home.html">Menu</a>
+      <button class="btn btn-danger" id="btnSair">Sair</button>
+    </div>
+  </div>
+
+  <div id="javatari">
+    <div id="javatari-screen"></div>
+  </div>
+
+  <div class="mm-dicas">
+    <b>Como jogar:</b> é o cartucho original do Atari 2600 rodando num emulador, com a imagem e o som de verdade.
+    No computador, mova a nave com <b>← →</b> e atire com <b>espaço</b>. <b>F12</b> é o botão Game Reset (começa a partida) e <b>F11</b> é o Game Select (troca o modo de jogo).
+    No celular, toque em <b>GO!</b> para abrir em tela cheia com o controle na tela.
+  </div>
+</div>
+
+<script src="js/auth.js?v=2"></script>
+<script src="js/javatari/javatari.js?v=2"></script>
+<script>
+  // Javatari (AGPL v3, js/javatari/license.txt): roda sempre o cartucho do Megamania
+  Javatari.CARTRIDGE_URL = "roms/megamania.bin";
+  Javatari.CARTRIDGE_CHANGE_DISABLED = true;
+  Javatari.CARTRIDGE_SHOW_RECENT = false;
+  Javatari.ALLOW_URL_PARAMETERS = false;
+  Javatari.AUTO_POWER_ON_DELAY = 300;
+  document.getElementById("btnSair").addEventListener("click", logout);
+</script>
+</body>
+</html>

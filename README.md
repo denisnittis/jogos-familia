@@ -1,12 +1,18 @@
 # Jogos da Família
 
 Site simples com login e alguns joguinhos: Forca, Jogo da Velha, Batalha
-Naval, Stop e Show do Milhão.
+Naval, Stop, Show do Milhão e Megamania.
 
 O **Show do Milhão** é o do jogo de Mega Drive (Show do Milhão Vol. 1 e 2,
 Tectoy 2001): as 1.989 perguntas dos dois volumes (sem repetições) e os sons
 do Vol. 2 foram extraídos das ROMs. É só para jogar sozinho, e o recorde
 fica salvo no próprio aparelho.
+
+O **Megamania** é o cartucho original do Atari 2600 (Activision, 1982)
+rodando no emulador [Javatari](https://github.com/ppeccin/javatari.js)
+(licença AGPL v3, em `js/javatari/license.txt`), então imagem e som são os
+do jogo de verdade. No celular, o botão GO! abre em tela cheia com o
+controle na tela.
 
 Forca, Jogo da Velha e Batalha Naval têm modo **Online (1 x 1)**: uma pessoa
 convida outra (dentre os 9 nomes cadastrados) e jogam em tempo real, cada
@@ -86,6 +92,7 @@ velha.html              → jogo da velha (2 jogadores, vs computador ou online 
 milhao.html             → show do milhão (perguntas, sons e lógica, tudo na página)
 batalha.html            → batalha naval (vs computador ou online 1x1)
 stop.html               → stop / adedonha (sala em grupo, 2+ jogadores)
+megamania.html          → megamania do atari 2600 (rodando no emulador)
 css/style.css           → estilos de todas as páginas
 js/auth.js              → lógica de login/logout e lista de usuários
 js/firebase-config.js   → chaves do SEU projeto Firebase (ver FIREBASE_SETUP.md)
@@ -96,6 +103,8 @@ js/velha.js             → lógica do jogo da velha
 js/batalha.js           → lógica da batalha naval
 js/stop.js              → lógica do stop (categorias, cronômetro, pontuação)
 sons/milhao/            → sons do show do milhão (sNN.mp3, extraídos da ROM)
+js/javatari/            → emulador de atari 2600 Javatari 5.0.4 (AGPL v3)
+roms/megamania.bin      → cartucho do megamania (ROM de 4 KB)
 ```
 
 Os arquivos `.js` e `.css` são carregados com `?v=2` no final (ex.:
