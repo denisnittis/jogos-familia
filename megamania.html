@@ -15,6 +15,13 @@
   #javatari-screen { margin: 0 auto; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); }
   .mm-dicas { background: #ffffffee; border-radius: 14px; padding: 12px 16px; margin-top: 18px; color: #333; font-size: 0.95rem; line-height: 1.45; }
   .mm-dicas b { color: #5b2a86; }
+  /* Direcional da tela cheia no celular 60% maior que o padrão do Javatari (que é pequeno para o dedo) */
+  @media (orientation: landscape) {
+    html.jt-full-screen.jt-touch-active #jt-touch-left { transform: translateY(50%) scale(1.6) !important; transform-origin: left center !important; }
+  }
+  @media (orientation: portrait) {
+    html.jt-full-screen.jt-touch-active #jt-touch-left { transform: scale(1.6) !important; transform-origin: left bottom !important; }
+  }
   .mm-iniciar { display: block; margin: 16px auto 0; font-size: 1.15rem; padding: 12px 28px; }
 </style>
 </head>
@@ -73,6 +80,8 @@
 </script>
 <script src="js/javatari/javatari.js?v=2"></script>
 <script>
+  // Abre espaço à esquerda da imagem, na tela cheia deitada, para o direcional maior
+  jt.ScreenGUI.TOUCH_CONTROLS_LEFT_WIDTH = jt.ScreenGUI.TOUCH_CONTROLS_LEFT_WIDTH_BIG = 190;
   // Javatari (AGPL v3, js/javatari/license.txt): roda sempre o cartucho do Megamania
   Javatari.CARTRIDGE_URL = "roms/megamania.bin";
   Javatari.CARTRIDGE_CHANGE_DISABLED = true;
