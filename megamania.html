@@ -15,6 +15,7 @@
   #javatari-screen { margin: 0 auto; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); }
   .mm-dicas { background: #ffffffee; border-radius: 14px; padding: 12px 16px; margin-top: 18px; color: #333; font-size: 0.95rem; line-height: 1.45; }
   .mm-dicas b { color: #5b2a86; }
+  .mm-iniciar { display: block; margin: 16px auto 0; font-size: 1.15rem; padding: 12px 28px; }
 </style>
 </head>
 <body>
@@ -31,10 +32,13 @@
     <div id="javatari-screen"></div>
   </div>
 
+  <button class="btn btn-primary mm-iniciar" id="btnIniciar">▶ Iniciar partida</button>
+
   <div class="mm-dicas">
     <b>Como jogar:</b> é o cartucho original do Atari 2600 rodando num emulador, com a imagem e o som de verdade.
+    Como no Atari, a partida só começa quando você aperta o <b>Game Reset</b>: use o botão <b>Iniciar partida</b> acima (também serve para recomeçar depois do fim de jogo).
     No computador, mova a nave com <b>← →</b> e atire com <b>espaço</b>. <b>F12</b> é o botão Game Reset (começa a partida) e <b>F11</b> é o Game Select (troca o modo de jogo).
-    No celular, toque em <b>GO!</b> para abrir em tela cheia com o controle na tela.
+    No celular, toque em <b>GO!</b> para abrir em tela cheia com o controle na tela; lá, a partida começa tocando na chave <b>GAME RESET</b> (a da direita, no painel do Atari embaixo).
   </div>
 </div>
 
@@ -48,6 +52,19 @@
   Javatari.ALLOW_URL_PARAMETERS = false;
   Javatari.AUTO_POWER_ON_DELAY = 300;
   document.getElementById("btnSair").addEventListener("click", logout);
+
+  // Aperta e solta o Game Reset do console, que é o que começa a partida no Megamania
+  document.getElementById("btnIniciar").addEventListener("click", function () {
+    var controles = Javatari.room && Javatari.room.consoleControls;
+    if (!controles) return;
+    // No celular, abre a tela cheia com o controle na tela (o mesmo que tocar no GO!)
+    var go = document.getElementById("jt-logo-message-ok");
+    if (go && go.offsetParent !== null) go.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+    controles.processControlState(jt.ConsoleControls.RESET, true);
+    setTimeout(function () { controles.processControlState(jt.ConsoleControls.RESET, false); }, 150);
+    this.blur();
+    if (Javatari.room.screen.focus) Javatari.room.screen.focus(); // devolve o teclado para o emulador
+  });
 </script>
 </body>
 </html>
