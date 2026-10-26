@@ -116,3 +116,12 @@ uma atualização, em vez de usar a cópia guardada. Ao mudar algum `.js` ou o
 Para adicionar um novo joguinho depois, crie um novo `.html` seguindo o
 mesmo padrão dos outros (com o bloco de verificação de login no `<head>`) e
 adicione um card novo em `home.html`.
+
+## Instalar no celular
+
+O site pode ser instalado na tela inicial como um aplicativo. Ao abrir o
+link, aparece um popup: no Android (Chrome) com o botão **Instalar**; no
+iPhone, com o passo a passo (Compartilhar > Adicionar à Tela de Início).
+Depois de "Agora não" ele só volta em 7 dias, e não aparece se já estiver
+instalado. O `sw.js` não guarda nada em cache, então as atualizações
+continuam chegando na hora.
