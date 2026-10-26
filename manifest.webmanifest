@@ -1,0 +1,17 @@
+{
+  "name": "Jogos da Família",
+  "short_name": "Jogos",
+  "description": "Forca, Velha, Batalha Naval, Stop, Show do Milhão e clássicos do Atari para a família.",
+  "lang": "pt-BR",
+  "id": "./",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#6a3093",
+  "theme_color": "#6a3093",
+  "icons": [
+    { "src": "icones/icone-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icones/icone-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icones/icone-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
